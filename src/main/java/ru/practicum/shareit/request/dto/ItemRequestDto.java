@@ -6,10 +6,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-/**
- * TODO Sprint add-item-requests.
- */
-
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor

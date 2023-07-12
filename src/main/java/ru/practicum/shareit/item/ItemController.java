@@ -57,6 +57,4 @@ public class ItemController {
         log.info(LOG_MESSAGE + "получение всех предметов пользователя с id: " + owner);
         return itemService.getItemsByOwner(owner);
     }
-
-
 }
