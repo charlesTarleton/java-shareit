@@ -52,7 +52,7 @@ public class InMemoryUserRepository implements UserRepository {
         log.info(LOG_SUCCESS_MESSAGE, "получение всех пользователей", "");
         return new ArrayList<>(usersMap.values());
     }
-    
+
     private String validateUserEmail(String email) {
         log.info("Начата процедура проверки эл. почты {} на дублирование", email);
         if (emailsMap.containsValue(email)) {
