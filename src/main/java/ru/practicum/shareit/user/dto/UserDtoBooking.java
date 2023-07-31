@@ -3,21 +3,14 @@ package ru.practicum.shareit.user.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.shareit.item.model.Comment;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 @Setter
 @Getter
 @AllArgsConstructor
-public class UserDto {
+public class UserDtoBooking {
     private Long id;
     @NotBlank
     private String name;
-    @Email
-    @NotBlank
-    private String email;
-    List<Comment> comments;
 }
