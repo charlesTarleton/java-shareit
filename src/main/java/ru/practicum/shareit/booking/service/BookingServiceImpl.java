@@ -17,6 +17,7 @@ import ru.practicum.shareit.item.repository.ItemRepositoryImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,6 +42,9 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingDto.getStart().isBefore(bookingDto.getEnd())) {
             throw new BookingDateValidationException("Ошибка. Дата начала бронирования должна быть раньше конца");
         }
+        if (item.getOwner().getId().longValue() == userId) {
+            throw new ItemWithoutOwnerException("Ошибка. Владелец вещи не может направить запрос на ее аренду");
+        }
         User user = checkUserExist(userId);
         Booking booking = BookingMapper.toBookingFromReceivedDto(bookingDto, item, user);
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
@@ -49,6 +53,9 @@ public class BookingServiceImpl implements BookingService {
     public ReturnBookingDto setBookingStatus(Long bookingId, Boolean status, Long ownerId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow();
         checkUserIsOwner(ownerId, booking.getItem().getOwner().getId());
+        if (!booking.getStatus().equals(BookingStatus.WAITING)) {
+            throw new BookingChangeStatusException("Ошибка. Повторное принятие решения по брони не допускается");
+        }
         if (status) {
             booking.setStatus(BookingStatus.APPROVED);
         } else {
@@ -59,7 +66,10 @@ public class BookingServiceImpl implements BookingService {
 
     public ReturnBookingDto getBooking(Long bookingId, Long userId) {
         checkUserExist(userId);
-        checkBookingExist(bookingId);
+        Booking booking = checkBookingExist(bookingId);
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
+            throw new UserExistException("Ошибка. Запрашивать данные о брони может только причастное к ней лицо");
+        }
         return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).orElseThrow());
     }
 
@@ -68,13 +78,13 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findAllCurrentByBookerId(bookerId);
+                bookings = bookingRepository.findAllCurrentByBookerId(bookerId, LocalDateTime.now());
                 break;
             case PAST:
-                bookings = bookingRepository.findAllPastByBookerId(bookerId);
+                bookings = bookingRepository.findAllPastByBookerId(bookerId, LocalDateTime.now());
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllFutureByBookerId(bookerId);
+                bookings = bookingRepository.findAllFutureByBookerId(bookerId, LocalDateTime.now());
                 break;
             case WAITING:
                 bookings = bookingRepository.findAllWaitingByBookerId(bookerId);
@@ -92,13 +102,13 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findAllCurrentByOwnerId(ownerId);
+                bookings = bookingRepository.findAllCurrentByOwnerId(ownerId, LocalDateTime.now());
                 break;
             case PAST:
-                bookings = bookingRepository.findAllPastByOwnerId(ownerId);
+                bookings = bookingRepository.findAllPastByOwnerId(ownerId, LocalDateTime.now());
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllFutureByOwnerId(ownerId);
+                bookings = bookingRepository.findAllFutureByOwnerId(ownerId, LocalDateTime.now());
                 break;
             case WAITING:
                 bookings = bookingRepository.findAllWaitingByOwnerId(ownerId);
@@ -131,15 +141,17 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkUserIsOwner(Long currentOwnerId, Long legalOwnerId) {
         log.info("Начата процедура проверки принадлежности предмета пользователю с id: {}", currentOwnerId);
-        if (!currentOwnerId.equals(legalOwnerId)) {
+        if (!(currentOwnerId.longValue() == legalOwnerId.longValue())) {
             throw new ItemWithWrongOwner("Ошибка. Обновить/удалить предмет может только владелец предмета");
         }
     }
 
-    private void checkBookingExist(Long bookingId) {
+    private Booking checkBookingExist(Long bookingId) {
         log.info("Начата процедура проверки наличия в репозитории брони с id: {}", bookingId);
-        if (bookingRepository.findById(bookingId).isEmpty()) {
+        Optional<Booking> bookingOptional = bookingRepository.findById(bookingId);
+        if (bookingOptional.isEmpty()) {
             throw new BookingExistException("Ошибка. Запрошенной брони в базе данных не существует");
         }
+        return bookingOptional.orElseThrow();
     }
 }

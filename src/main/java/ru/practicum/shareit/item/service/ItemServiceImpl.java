@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
+import ru.practicum.shareit.booking.repository.BookingRepositoryImpl;
 import ru.practicum.shareit.exceptions.ItemExistException;
 import ru.practicum.shareit.exceptions.ItemWithWrongOwner;
 import ru.practicum.shareit.exceptions.UserExistException;
@@ -17,6 +19,7 @@ import ru.practicum.shareit.item.repository.ItemRepositoryImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +32,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepositoryImpl itemRepository;
     private final CommentRepositoryImpl commentRepository;
     private final UserRepositoryImpl userRepository;
+    private final BookingRepositoryImpl bookingRepository;
 
     private static final String LOG_MESSAGE = "Сервис предметов получил запрос на {}{}";
 
@@ -67,7 +71,11 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto getItem(Long itemId) {
         log.info(LOG_MESSAGE, "получение предмета с id: ", itemId);
         Item item = checkItemExist(itemId);
-        return ItemMapper.toItemDto(item, commentRepository.findAllByItem(item));
+        return ItemMapper.toItemDtoGetMethod(
+                item,
+                commentRepository.findAllByItem(item),
+                bookingRepository.findFirstByEndBeforeAndItemIdOrderByEndDesc(LocalDateTime.now(), itemId),
+                bookingRepository.findFirstByStartAfterAndItemIdOrderByStartAsc(LocalDateTime.now(), itemId));
     }
 
     public List<ItemDto> getItemsByOwner(Long ownerId) {

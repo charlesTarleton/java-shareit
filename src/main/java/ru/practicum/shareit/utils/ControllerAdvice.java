@@ -24,7 +24,7 @@ public class ControllerAdvice {
     private static final String ERROR_500_DESCRIPTION = "Возникло исключение";
 
     @ExceptionHandler({ItemNotAvailableException.class, MethodArgumentNotValidException.class,
-            ValidationException.class})
+            ValidationException.class, BookingChangeStatusException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse fourHundredErrorHandle(final Exception exception) {
         log.warn(ERROR_400, exception);
