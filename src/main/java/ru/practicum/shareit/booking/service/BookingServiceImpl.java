@@ -11,8 +11,7 @@ import ru.practicum.shareit.booking.dto.ReceivedBookingDto;
 import ru.practicum.shareit.booking.dto.ReturnBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepositoryImpl;
-import ru.practicum.shareit.exceptions.ItemWithWrongOwner;
-import ru.practicum.shareit.exceptions.ItemWithoutOwnerException;
+import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepositoryImpl;
 import ru.practicum.shareit.user.model.User;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class BookingServiceImpl implements BookingService {
     private final BookingRepositoryImpl bookingRepository;
     private final UserRepositoryImpl userRepository;
@@ -33,6 +32,15 @@ public class BookingServiceImpl implements BookingService {
 
     public ReturnBookingDto addBooking(ReceivedBookingDto bookingDto, Long userId) {
         Item item = checkItemExist(bookingDto.getItemId());
+        if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
+            throw new BookingDateValidationException("Ошибка. Даты бронирования не могут содержать null");
+        }
+        if (!item.getAvailable()) {
+            throw new ItemNotAvailableException("Ошибка. Предмет не доступен для бронирования");
+        }
+        if (!bookingDto.getStart().isBefore(bookingDto.getEnd())) {
+            throw new BookingDateValidationException("Ошибка. Дата начала бронирования должна быть раньше конца");
+        }
         User user = checkUserExist(userId);
         Booking booking = BookingMapper.toBookingFromReceivedDto(bookingDto, item, user);
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
@@ -49,44 +57,40 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
-    public ReturnBookingDto getBooking(Long bookingId) {
+    public ReturnBookingDto getBooking(Long bookingId, Long userId) {
+        checkUserExist(userId);
+        checkBookingExist(bookingId);
         return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).orElseThrow());
     }
 
-    @Transactional
-    public List<ReturnBookingDto> getOwnerBookings(BookingState state, Long ownerId) {
+    public List<ReturnBookingDto> getBookerBookings(BookingState state, Long bookerId) {
+        checkUserExist(bookerId);
         List<Booking> bookings;
         switch (state) {
-            case ALL:
-                bookings = bookingRepository.findAllByBookerId(ownerId);
-                break;
             case CURRENT:
-                bookings = bookingRepository.findAllCurrentByBookerId(ownerId);
+                bookings = bookingRepository.findAllCurrentByBookerId(bookerId);
                 break;
             case PAST:
-                bookings = bookingRepository.findAllPastByBookerId(ownerId);
+                bookings = bookingRepository.findAllPastByBookerId(bookerId);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllFutureByBookerId(ownerId);
+                bookings = bookingRepository.findAllFutureByBookerId(bookerId);
                 break;
             case WAITING:
-                bookings = bookingRepository.findAllWaitingByBookerId(ownerId);
+                bookings = bookingRepository.findAllWaitingByBookerId(bookerId);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findAllRejectedByBookerId(ownerId);
+                bookings = bookingRepository.findAllRejectedByBookerId(bookerId);
                 break;
-            default: bookings = List.of();
+            default: bookings = bookingRepository.findAllByBookerId(bookerId);
         }
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 
-    @Transactional
-    public List<ReturnBookingDto> getOwnerItemsBookings(BookingState state, Long ownerId) {
+    public List<ReturnBookingDto> getOwnerBookings(BookingState state, Long ownerId) { // сервис
+        checkUserExist(ownerId);
         List<Booking> bookings;
         switch (state) {
-            case ALL:
-                bookings = bookingRepository.findAllByOwnerId(ownerId);
-                break;
             case CURRENT:
                 bookings = bookingRepository.findAllCurrentByOwnerId(ownerId);
                 break;
@@ -102,7 +106,7 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 bookings = bookingRepository.findAllRejectedByOwnerId(ownerId);
                 break;
-            default: bookings = List.of();
+            default: bookings = bookingRepository.findAllByOwnerId(ownerId);
         }
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
@@ -111,8 +115,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("Начата процедура проверки наличия в репозитории пользователя с id: {}", ownerId);
         Optional<User> userOptional = userRepository.findById(ownerId);
         if (userOptional.isEmpty()) {
-            throw new ItemWithoutOwnerException("Ошибка. " +
-                    "Создать/обновить/удалить предмет может только зарегистрированный в приложении пользователь");
+            throw new UserExistException("Ошибка. Запрошенного пользователя в базе данных не существует");
         }
         return userOptional.orElseThrow();
     }
@@ -121,8 +124,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("Начата процедура проверки наличия в репозитории предмета с id: {}", itemId);
         Optional<Item> itemOptional = itemRepository.findById(itemId);
         if (itemOptional.isEmpty()) {
-            throw new ItemWithoutOwnerException("Ошибка. " +
-                    "Создать/обновить/удалить предмет может только зарегистрированный в приложении пользователь");
+            throw new ItemExistException("Ошибка. Запрошенного предмета в базе данных не существует");
         }
         return itemOptional.orElseThrow();
     }
@@ -131,6 +133,13 @@ public class BookingServiceImpl implements BookingService {
         log.info("Начата процедура проверки принадлежности предмета пользователю с id: {}", currentOwnerId);
         if (!currentOwnerId.equals(legalOwnerId)) {
             throw new ItemWithWrongOwner("Ошибка. Обновить/удалить предмет может только владелец предмета");
+        }
+    }
+
+    private void checkBookingExist(Long bookingId) {
+        log.info("Начата процедура проверки наличия в репозитории брони с id: {}", bookingId);
+        if (bookingRepository.findById(bookingId).isEmpty()) {
+            throw new BookingExistException("Ошибка. Запрошенной брони в базе данных не существует");
         }
     }
 }

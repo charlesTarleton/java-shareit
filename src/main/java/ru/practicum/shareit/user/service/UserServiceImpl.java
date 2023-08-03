@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exceptions.UserExistException;
 import ru.practicum.shareit.item.repository.CommentRepositoryImpl;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 import ru.practicum.shareit.user.userUtils.UserMapper;
 
@@ -35,8 +37,9 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null) {
             userDto.setEmail(userRepository.findById(userId).orElseThrow().getEmail());
         }
-        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)),
-                commentRepository.findAllByAuthor(userId));
+        User user = UserMapper.toUser(userDto);
+        return UserMapper.toUserDto(userRepository.save(user),
+                commentRepository.findAllByAuthor(user));
     }
 
     public void deleteUser(Long userId) {
@@ -46,14 +49,22 @@ public class UserServiceImpl implements UserService {
 
     public UserDto getUser(Long userId) {
         log.info(LOG_MESSAGE, "получение пользователя с id: ", userId);
-        return UserMapper.toUserDto(userRepository.findById(userId).orElseThrow(),
-                commentRepository.findAllByAuthor(userId));
+        checkUserExist(userId);
+        User user = userRepository.findById(userId).orElseThrow();
+        return UserMapper.toUserDto(user, commentRepository.findAllByAuthor(user));
     }
 
     public List<UserDto> getUsers() {
         log.info(LOG_MESSAGE, "получение всех пользователей", "");
         return userRepository.findAll().stream()
-                .map(user -> UserMapper.toUserDto(user, commentRepository.findAllByAuthor(user.getId())))
+                .map(user -> UserMapper.toUserDto(user, commentRepository.findAllByAuthor(user)))
                 .collect(Collectors.toList());
+    }
+
+    private void checkUserExist(Long ownerId) {
+        log.info("Начата процедура проверки наличия в репозитории пользователя с id: {}", ownerId);
+        if (userRepository.findById(ownerId).isEmpty()) {
+            throw new UserExistException("Ошибка. Запрошенного пользователя в базе данных не существует");
+        }
     }
 }

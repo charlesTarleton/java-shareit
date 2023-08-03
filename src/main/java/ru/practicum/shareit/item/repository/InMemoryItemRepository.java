@@ -1,5 +1,5 @@
 package ru.practicum.shareit.item.repository;
-
+/*
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
@@ -63,4 +63,4 @@ public class InMemoryItemRepository implements ItemRepository {
         log.info(LOG_MESSAGE, "получение всех предметов", "");
         return new ArrayList<>(itemsById.values());
     }
-}
+}*/

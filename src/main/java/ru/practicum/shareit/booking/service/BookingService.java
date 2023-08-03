@@ -11,9 +11,9 @@ public interface BookingService {
 
     ReturnBookingDto setBookingStatus(Long bookingId, Boolean status, Long ownerId);
 
-    ReturnBookingDto getBooking(Long bookingId);
+    ReturnBookingDto getBooking(Long bookingId, Long userId);
+
+    List<ReturnBookingDto> getBookerBookings(BookingState state, Long bookerId);
 
     List<ReturnBookingDto> getOwnerBookings(BookingState state, Long ownerId);
-
-    List<ReturnBookingDto> getOwnerItemsBookings(BookingState state, Long ownerId);
 }

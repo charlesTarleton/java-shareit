@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exceptions.ItemExistException;
 import ru.practicum.shareit.exceptions.ItemWithWrongOwner;
-import ru.practicum.shareit.exceptions.ItemWithoutOwnerException;
+import ru.practicum.shareit.exceptions.UserExistException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemUtils.CommentMapper;
@@ -29,7 +30,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepositoryImpl commentRepository;
     private final UserRepositoryImpl userRepository;
 
-    private static final String LOG_MESSAGE = "Сервис предметов получил запрос на {}, {}";
+    private static final String LOG_MESSAGE = "Сервис предметов получил запрос на {}{}";
 
     public ItemDto addItem(ItemDto itemDto, Long ownerId) {
         log.info(LOG_MESSAGE, "добавление предмета: ", itemDto);
@@ -41,9 +42,19 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(Long itemId, ItemDto itemDto, Long ownerId) {
         log.info(LOG_MESSAGE, "обновление предмета c id: ", itemId);
         User owner = checkUserExist(ownerId);
+        Item currentBDItem = checkItemExist(itemId);
+        Item item = ItemMapper.toItem(itemId, itemDto, owner);
+        if (item.getName() == null) {
+            item.setName(currentBDItem.getName());
+        }
+        if (item.getDescription() == null) {
+            item.setDescription(currentBDItem.getDescription());
+        }
+        if (item.getAvailable() == null) {
+            item.setAvailable(currentBDItem.getAvailable());
+        }
         checkUserIsOwner(itemId, ownerId);
-        return ItemMapper.toItemDto(itemRepository.save(ItemMapper
-                .toItem(itemId, itemDto, owner)), commentRepository.findAllByItem(itemId));
+        return ItemMapper.toItemDto(itemRepository.save(item), commentRepository.findAllByItem(item));
     }
 
     public void deleteItem(Long itemId, Long ownerId) {
@@ -55,18 +66,26 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemDto getItem(Long itemId) {
         log.info(LOG_MESSAGE, "получение предмета с id: ", itemId);
-        return ItemMapper.toItemDto(itemRepository.findById(itemId).orElseThrow(),
-                commentRepository.findAllByItem(itemId));
+        Item item = checkItemExist(itemId);
+        return ItemMapper.toItemDto(item, commentRepository.findAllByItem(item));
     }
 
     public List<ItemDto> getItemsByOwner(Long ownerId) {
-        return itemRepository.findAllByOwnerId(ownerId).stream()
-                .map(item -> ItemMapper.toItemDto(item, commentRepository.findAllByItem(item.getId())))
+        log.info(LOG_MESSAGE, "получение предметов по пользователю с id: ", ownerId);
+        User owner = userRepository.findById(ownerId).orElseThrow();
+        return itemRepository.findAllByOwner(owner).stream()
+                .map(item -> ItemMapper.toItemDto(item, commentRepository.findAllByItem(item)))
                 .collect(Collectors.toList());
     }
 
-    public List<ItemDto> getItemsByName(String name) {
-        return null;
+    public List<ItemDto> getItemsByName(String text) { // сервис
+        log.info(LOG_MESSAGE, "получение предметов по названию: ", text);
+        if (text.isBlank()) {
+            return List.of();
+        }
+        return itemRepository.findAllByText(text).stream()
+                .map(item -> ItemMapper.toItemDto(item, commentRepository.findAllByItem(item)))
+                .collect(Collectors.toList());
     }
 
     public CommentDto addCommentToItem(Long itemId, CommentDto commentDto, Long authorId) {
@@ -81,8 +100,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Начата процедура проверки наличия в репозитории пользователя с id: {}", ownerId);
         Optional<User> userOptional = userRepository.findById(ownerId);
         if (userOptional.isEmpty()) {
-            throw new ItemWithoutOwnerException("Ошибка. " +
-                    "Создать/обновить/удалить предмет может только зарегистрированный в приложении пользователь");
+            throw new UserExistException("Ошибка. Запрошенного пользователя в базе данных не существует");
         }
         return userOptional.orElseThrow();
     }
@@ -91,8 +109,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Начата процедура проверки наличия в репозитории предмета с id: {}", itemId);
         Optional<Item> itemOptional = itemRepository.findById(itemId);
         if (itemOptional.isEmpty()) {
-            throw new ItemWithoutOwnerException("Ошибка. " +
-                    "Создать/обновить/удалить предмет может только зарегистрированный в приложении пользователь");
+            throw new ItemExistException("Ошибка. Запрошенного предмета в базе данных не существует");
         }
         return itemOptional.orElseThrow();
     }

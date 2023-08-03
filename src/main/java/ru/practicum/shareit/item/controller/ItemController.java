@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private static final String LOG_MESSAGE = "Контроллер предметов получил запрос на {} {}";
+    private static final String LOG_MESSAGE = "Контроллер предметов получил запрос на {}{}";
     private static final String OWNER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
@@ -45,9 +45,9 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsByName(@RequestParam("text") String name) {
-        log.info(LOG_MESSAGE, "получение всех предметов, содержащих в названии: ", name);
-        return itemService.getItemsByName(name);
+    public List<ItemDto> getItemsByName(@RequestParam("text") String text) {
+        log.info(LOG_MESSAGE, "получение всех предметов, содержащих в названии: ", text);
+        return itemService.getItemsByName(text);
     }
 
     @GetMapping
