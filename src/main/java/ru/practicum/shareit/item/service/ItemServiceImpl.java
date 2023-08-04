@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.repository.BookingRepositoryImpl;
 import ru.practicum.shareit.exceptions.ItemExistException;
 import ru.practicum.shareit.exceptions.ItemWithWrongOwner;
@@ -68,21 +67,29 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.deleteById(itemId);
     }
 
-    public ItemDto getItem(Long itemId) {
+    public ItemDto getItem(Long itemId, Long userId) {
         log.info(LOG_MESSAGE, "получение предмета с id: ", itemId);
         Item item = checkItemExist(itemId);
         return ItemMapper.toItemDtoGetMethod(
                 item,
                 commentRepository.findAllByItem(item),
-                bookingRepository.findFirstByEndBeforeAndItemIdOrderByEndDesc(LocalDateTime.now(), itemId),
-                bookingRepository.findFirstByStartAfterAndItemIdOrderByStartAsc(LocalDateTime.now(), itemId));
+                bookingRepository.findFirstByEndBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(LocalDateTime.now(),
+                        itemId, userId),
+                bookingRepository.findFirstByStartAfterAndItemIdAndItemOwnerIdOrderByStartAsc(LocalDateTime.now(),
+                        itemId, userId));
     }
 
     public List<ItemDto> getItemsByOwner(Long ownerId) {
         log.info(LOG_MESSAGE, "получение предметов по пользователю с id: ", ownerId);
-        User owner = userRepository.findById(ownerId).orElseThrow();
-        return itemRepository.findAllByOwner(owner).stream()
-                .map(item -> ItemMapper.toItemDto(item, commentRepository.findAllByItem(item)))
+        checkUserExist(ownerId);
+        return bookingRepository.findAllByOwnerId(ownerId).stream()
+                .map(booking -> ItemMapper.toItemDtoGetMethod(
+                        booking.getItem(),
+                        commentRepository.findAllByItem(booking.getItem()),
+                        bookingRepository.findFirstByEndBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(
+                                LocalDateTime.now(), booking.getId(), ownerId),
+                        bookingRepository.findFirstByStartAfterAndItemIdAndItemOwnerIdOrderByStartAsc(
+                                LocalDateTime.now(), booking.getId(), ownerId)))
                 .collect(Collectors.toList());
     }
 

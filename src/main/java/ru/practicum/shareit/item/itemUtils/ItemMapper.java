@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.itemUtils;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import ru.practicum.shareit.booking.bookingUtils.BookingItemDtoShort;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;

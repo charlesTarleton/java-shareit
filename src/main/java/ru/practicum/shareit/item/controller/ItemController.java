@@ -39,9 +39,9 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ItemDto getItem(@PathVariable("id") Long itemId) {
+    public ItemDto getItem(@PathVariable("id") Long itemId, @RequestHeader(OWNER_HEADER) Long userId) {
         log.info(LOG_MESSAGE, "получение предмета с id: ", itemId);
-        return itemService.getItem(itemId);
+        return itemService.getItem(itemId, userId);
     }
 
     @GetMapping("/search")

@@ -12,7 +12,7 @@ public interface ItemService {
 
     public void deleteItem(Long itemId, Long owner);
 
-    public ItemDto getItem(Long itemId);
+    public ItemDto getItem(Long itemId, Long userId);
 
     public List<ItemDto> getItemsByOwner(Long owner);
 

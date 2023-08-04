@@ -23,7 +23,7 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
             "FROM Booking AS b " +
             "JOIN FETCH b.booker " +
             "WHERE b.start < ?2 AND b.end > ?2 AND b.booker.id = ?1 " +
-            "ORDER BY b.start DESC")
+            "ORDER BY b.start ASC")
     List<Booking> findAllCurrentByBookerId(Long bookerId, LocalDateTime currentTime); // Booker CURRENT
 
     @Query("SELECT b " +
@@ -43,14 +43,14 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "JOIN FETCH b.booker " +
-            "WHERE b.status = waiting AND b.booker.id = ?1 " +
+            "WHERE b.status = 'WAITING' AND b.booker.id = ?1 " +
             "ORDER BY b.start DESC")
     List<Booking> findAllWaitingByBookerId(Long bookerId); // Booker WAITING
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "JOIN FETCH b.booker " +
-            "WHERE b.status = rejected AND b.booker.id = ?1 " +
+            "WHERE b.status = 'REJECTED' AND b.booker.id = ?1 " +
             "ORDER BY b.start DESC")
     List<Booking> findAllRejectedByBookerId(Long bookerId); // Booker REJECTED
 
@@ -65,7 +65,7 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
             "FROM Booking AS b " +
             "JOIN FETCH b.item " +
             "WHERE b.start < ?2 AND b.end > ?2 AND b.item.owner.id = ?1 " +
-            "ORDER BY b.start DESC")
+            "ORDER BY b.start ASC")
     List<Booking> findAllCurrentByOwnerId(Long ownerId, LocalDateTime currentTime); // Owner CURRENT
 
     @Query("SELECT b " +
@@ -85,18 +85,20 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "JOIN FETCH b.item " +
-            "WHERE b.status = waiting AND b.item.owner.id = ?1 " +
+            "WHERE b.status = 'WAITING' AND b.item.owner.id = ?1 " +
             "ORDER BY b.start DESC")
     List<Booking> findAllWaitingByOwnerId(Long ownerId); // Owner WAITING
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "JOIN FETCH b.item " +
-            "WHERE b.status = rejected AND b.item.owner.id = ?1 " +
+            "WHERE b.status = 'REJECTED' AND b.item.owner.id = ?1 " +
             "ORDER BY b.start DESC")
     List<Booking> findAllRejectedByOwnerId(Long ownerId); // Owner REJECTED
 
-    BookingItemDto findFirstByEndBeforeAndItemIdOrderByEndDesc(LocalDateTime currentTime, Long itemId);
+    BookingItemDto findFirstByEndBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(LocalDateTime currentTime,
+                                                                             Long itemId, Long userId);
 
-    BookingItemDto findFirstByStartAfterAndItemIdOrderByStartAsc(LocalDateTime currentTime, Long itemId);
+    BookingItemDto findFirstByStartAfterAndItemIdAndItemOwnerIdOrderByStartAsc(LocalDateTime currentTime,
+                                                                               Long itemId, Long userId);
 }
