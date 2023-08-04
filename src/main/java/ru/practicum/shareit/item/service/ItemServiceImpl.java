@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.bookingUtils.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepositoryImpl;
+import ru.practicum.shareit.exceptions.CommentBookerException;
 import ru.practicum.shareit.exceptions.ItemExistException;
 import ru.practicum.shareit.exceptions.ItemWithWrongOwner;
 import ru.practicum.shareit.exceptions.UserExistException;
@@ -19,6 +21,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -70,30 +73,26 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto getItem(Long itemId, Long userId) {
         log.info(LOG_MESSAGE, "получение предмета с id: ", itemId);
         Item item = checkItemExist(itemId);
-        return ItemMapper.toItemDtoGetMethod(
-                item,
-                commentRepository.findAllByItem(item),
-                bookingRepository.findFirstByEndBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(LocalDateTime.now(),
-                        itemId, userId),
-                bookingRepository.findFirstByStartAfterAndItemIdAndItemOwnerIdOrderByStartAsc(LocalDateTime.now(),
-                        itemId, userId));
+        return unitedQueryForBookingItemDto(item, userId);
     }
 
     public List<ItemDto> getItemsByOwner(Long ownerId) {
         log.info(LOG_MESSAGE, "получение предметов по пользователю с id: ", ownerId);
         checkUserExist(ownerId);
-        return bookingRepository.findAllByOwnerId(ownerId).stream()
-                .map(booking -> ItemMapper.toItemDtoGetMethod(
-                        booking.getItem(),
-                        commentRepository.findAllByItem(booking.getItem()),
-                        bookingRepository.findFirstByEndBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(
-                                LocalDateTime.now(), booking.getId(), ownerId),
-                        bookingRepository.findFirstByStartAfterAndItemIdAndItemOwnerIdOrderByStartAsc(
-                                LocalDateTime.now(), booking.getId(), ownerId)))
+        List<Long> order = bookingRepository.findAllByOwnerId(ownerId).stream()
+                .map(booking -> booking.getItem().getId())
+                .collect(Collectors.toList());
+
+        return itemRepository.findAllByOwner(userRepository.findById(ownerId).orElseThrow()).stream()
+                .map(item -> unitedQueryForBookingItemDto(item, ownerId))
+                .sorted(Comparator.comparing(itemDto -> {
+                    Long itemId = itemDto.getId();
+                    int index = order.indexOf(itemId);
+                    return index != -1 ? index : Integer.MAX_VALUE;}))
                 .collect(Collectors.toList());
     }
 
-    public List<ItemDto> getItemsByName(String text) { // сервис
+    public List<ItemDto> getItemsByName(String text) {
         log.info(LOG_MESSAGE, "получение предметов по названию: ", text);
         if (text.isBlank()) {
             return List.of();
@@ -107,6 +106,9 @@ public class ItemServiceImpl implements ItemService {
         log.info(LOG_MESSAGE, "добавление комментария: ", commentDto.getText());
         Item item = checkItemExist(itemId);
         User author = checkUserExist(authorId);
+        bookingRepository.findAllPastByBookerId(authorId, LocalDateTime.now()).stream()
+                .filter(booking -> booking.getItem().getId().longValue() == itemId).findFirst()
+                .orElseThrow(() -> new CommentBookerException("Ошибка. Комментарий может оставить бывший арендатор"));
         return CommentMapper.toCommentDto(commentRepository.save(CommentMapper
                 .toComment(commentDto, item, author)));
     }
@@ -134,5 +136,15 @@ public class ItemServiceImpl implements ItemService {
         if (!itemRepository.findById(itemId).orElseThrow().getOwner().getId().equals(ownerId)) {
             throw new ItemWithWrongOwner("Ошибка. Обновить/удалить предмет может только владелец предмета");
         }
+    }
+
+    private ItemDto unitedQueryForBookingItemDto(Item item,Long userId) {
+        return ItemMapper.toItemDtoGetMethod(
+                item,
+                commentRepository.findAllByItem(item),
+                bookingRepository.findFirstByStartBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(
+                        LocalDateTime.now(), item.getId(), userId),
+                bookingRepository.findFirstByStartAfterAndItemIdAndItemOwnerIdAndStatusOrderByStartAsc(
+                        LocalDateTime.now(), item.getId(), userId, BookingStatus.APPROVED));
     }
 }

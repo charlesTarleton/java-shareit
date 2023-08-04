@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import ru.practicum.shareit.booking.bookingUtils.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 
@@ -96,9 +97,10 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
             "ORDER BY b.start DESC")
     List<Booking> findAllRejectedByOwnerId(Long ownerId); // Owner REJECTED
 
-    BookingItemDto findFirstByEndBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(LocalDateTime currentTime,
+    BookingItemDto findFirstByStartBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(LocalDateTime currentTime,
                                                                              Long itemId, Long userId);
 
-    BookingItemDto findFirstByStartAfterAndItemIdAndItemOwnerIdOrderByStartAsc(LocalDateTime currentTime,
-                                                                               Long itemId, Long userId);
+    BookingItemDto findFirstByStartAfterAndItemIdAndItemOwnerIdAndStatusOrderByStartAsc(LocalDateTime currentTime,
+                                                                                        Long itemId, Long userId,
+                                                                                        BookingStatus status);
 }

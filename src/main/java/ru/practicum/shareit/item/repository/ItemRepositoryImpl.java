@@ -12,6 +12,8 @@ public interface ItemRepositoryImpl extends JpaRepository<Item, Long> {
 
     Optional<Item> findById(Long itemId);
 
+    List<Item> findAllByOwner(User owner);
+
     @Query("SELECT i " +
             "FROM Item AS i " +
             "WHERE (LOWER(i.name) LIKE LOWER(CONCAT('%', ?1, '%')) " +
