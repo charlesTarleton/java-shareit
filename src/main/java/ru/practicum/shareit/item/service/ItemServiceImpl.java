@@ -88,7 +88,8 @@ public class ItemServiceImpl implements ItemService {
                 .sorted(Comparator.comparing(itemDto -> {
                     Long itemId = itemDto.getId();
                     int index = order.indexOf(itemId);
-                    return index != -1 ? index : Integer.MAX_VALUE;}))
+                    return index != -1 ? index : Integer.MAX_VALUE;
+                }))
                 .collect(Collectors.toList());
     }
 
