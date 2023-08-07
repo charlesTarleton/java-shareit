@@ -15,11 +15,12 @@ public class CommentMapper {
         return new CommentDto(
                 comment.getId(),
                 comment.getText(),
-                comment.getAuthor().getName());
+                comment.getAuthor().getName(),
+                comment.getCreated());
     }
 
     public Comment toComment(CommentDto commentDto, Item item, User author) {
         log.info("Начата процедура преобразования ДТО в комментарий: {}", commentDto);
-        return new Comment(commentDto.getId(), commentDto.getText(), item, author);
+        return new Comment(commentDto.getId(), commentDto.getText(), item, author, commentDto.getCreated());
     }
 }

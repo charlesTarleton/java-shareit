@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -14,5 +15,5 @@ public class CommentDto {
     @NotBlank
     private String text;
     private String authorName;
-    private final boolean created = true;
+    private LocalDateTime created;
 }

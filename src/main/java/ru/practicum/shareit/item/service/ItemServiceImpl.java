@@ -60,7 +60,8 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(currentBDItem.getAvailable());
         }
         checkUserIsOwner(itemId, ownerId);
-        return ItemMapper.toItemDto(itemRepository.save(item), commentRepository.findAllByItem(item));
+        return ItemMapper.toItemDto(itemRepository.save(item), commentRepository.findAllByItem(item).stream()
+                .map(CommentMapper::toCommentDto).collect(Collectors.toList()));
     }
 
     public void deleteItem(Long itemId, Long ownerId) {
@@ -99,12 +100,16 @@ public class ItemServiceImpl implements ItemService {
             return List.of();
         }
         return itemRepository.findAllByText(text).stream()
-                .map(item -> ItemMapper.toItemDto(item, commentRepository.findAllByItem(item)))
+                .map(item -> ItemMapper.toItemDto(item,
+                        commentRepository.findAllByItem(item).stream()
+                                .map(CommentMapper::toCommentDto)
+                                .collect(Collectors.toList())))
                 .collect(Collectors.toList());
     }
 
     public CommentDto addCommentToItem(Long itemId, CommentDto commentDto, Long authorId) {
         log.info(LOG_MESSAGE, "добавление комментария: ", commentDto.getText());
+        commentDto.setCreated(LocalDateTime.now());
         Item item = checkItemExist(itemId);
         User author = checkUserExist(authorId);
         bookingRepository.findAllPastByBookerId(authorId, LocalDateTime.now()).stream()
@@ -142,7 +147,9 @@ public class ItemServiceImpl implements ItemService {
     private ItemDto unitedQueryForBookingItemDto(Item item,Long userId) {
         return ItemMapper.toItemDtoGetMethod(
                 item,
-                commentRepository.findAllByItem(item),
+                commentRepository.findAllByItem(item).stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList()),
                 bookingRepository.findFirstByStartBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(
                         LocalDateTime.now(), item.getId(), userId),
                 bookingRepository.findFirstByStartAfterAndItemIdAndItemOwnerIdAndStatusOrderByStartAsc(
