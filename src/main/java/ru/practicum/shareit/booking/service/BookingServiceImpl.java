@@ -54,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
 
     public ReturnBookingDto setBookingStatus(Long bookingId, Boolean status, Long ownerId) {
         log.info(SERVICE_LOG, "изменение статуса бронирования на: ", status);
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow();
+        Booking booking = checkBookingExist(bookingId);
         checkUserIsOwner(ownerId, booking.getItem().getOwner().getId());
         if (!booking.getStatus().equals(BookingStatus.WAITING)) {
             throw new BookingChangeStatusException("Ошибка. Повторное принятие решения по брони не допускается");
@@ -75,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
             throw new UserExistException("Ошибка. Запрашивать данные о брони может только причастное к ней лицо");
         }
-        return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).orElseThrow());
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Transactional(readOnly = true)
