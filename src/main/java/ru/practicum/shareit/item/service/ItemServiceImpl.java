@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.bookingUtils.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.repository.BookingRepositoryImpl;
 import ru.practicum.shareit.exceptions.CommentBookerException;
 import ru.practicum.shareit.exceptions.ItemExistException;
@@ -14,6 +14,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemUtils.CommentMapper;
 import ru.practicum.shareit.item.itemUtils.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepositoryImpl;
 import ru.practicum.shareit.item.repository.ItemRepositoryImpl;
@@ -21,10 +22,10 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.utils.ConstantaStorage.Item.SERVICE_LOG;
 
 @Service
 @Slf4j
@@ -36,17 +37,15 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepositoryImpl userRepository;
     private final BookingRepositoryImpl bookingRepository;
 
-    private static final String LOG_MESSAGE = "Сервис предметов получил запрос на {}{}";
-
     public ItemDto addItem(ItemDto itemDto, Long ownerId) {
-        log.info(LOG_MESSAGE, "добавление предмета: ", itemDto);
+        log.info(SERVICE_LOG, "добавление предмета: ", itemDto);
         User owner = checkUserExist(ownerId);
         return ItemMapper.toItemDto(itemRepository.save(ItemMapper
                 .toItem(null, itemDto, owner)), List.of());
     }
 
     public ItemDto updateItem(Long itemId, ItemDto itemDto, Long ownerId) {
-        log.info(LOG_MESSAGE, "обновление предмета c id: ", itemId);
+        log.info(SERVICE_LOG, "обновление предмета c id: ", itemId);
         User owner = checkUserExist(ownerId);
         Item currentBDItem = checkItemExist(itemId);
         Item item = ItemMapper.toItem(itemId, itemDto, owner);
@@ -59,56 +58,93 @@ public class ItemServiceImpl implements ItemService {
         if (item.getAvailable() == null) {
             item.setAvailable(currentBDItem.getAvailable());
         }
-        checkUserIsOwner(itemId, ownerId);
-        return ItemMapper.toItemDto(itemRepository.save(item), commentRepository.findAllByItem(item).stream()
+        checkUserIsOwner(itemId, ownerId); // здесь не стал применять groupBy т.к. запрос всегда на один предмет
+        return ItemMapper.toItemDto(itemRepository.save(item), commentRepository.findAllByItemId(itemId).stream()
                 .map(CommentMapper::toCommentDto).collect(Collectors.toList()));
     }
 
     public void deleteItem(Long itemId, Long ownerId) {
-        log.info(LOG_MESSAGE, "удаление предмета с id: ", itemId);
+        log.info(SERVICE_LOG, "удаление предмета с id: ", itemId);
         checkUserExist(ownerId);
         checkUserIsOwner(itemId, ownerId);
         itemRepository.deleteById(itemId);
     }
 
+    @Transactional(readOnly = true)
     public ItemDto getItem(Long itemId, Long userId) {
-        log.info(LOG_MESSAGE, "получение предмета с id: ", itemId);
+        log.info(SERVICE_LOG, "получение предмета с id: ", itemId);
         Item item = checkItemExist(itemId);
-        return unitedQueryForBookingItemDto(item, userId);
+
+        List<CommentDto> commentList = commentRepository.findAllByItemId(itemId).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+
+        BookingItemDto previousBooking = checkBookingItemDtoList(bookingRepository
+                .findNearPreviousBooking(LocalDateTime.now(), userId, itemId));
+
+        BookingItemDto nextBooking = checkBookingItemDtoList(bookingRepository
+                .findNearNextBooking(LocalDateTime.now(), userId, itemId));
+
+        return ItemMapper.toItemDtoGetMethod(item, commentList, previousBooking, nextBooking);
     }
 
+    @Transactional(readOnly = true)
     public List<ItemDto> getItemsByOwner(Long ownerId) {
-        log.info(LOG_MESSAGE, "получение предметов по пользователю с id: ", ownerId);
+        log.info(SERVICE_LOG, "получение предметов по пользователю с id: ", ownerId);
         checkUserExist(ownerId);
-        List<Long> order = bookingRepository.findAllByOwnerId(ownerId).stream()
-                .map(booking -> booking.getItem().getId())
-                .collect(Collectors.toList());
 
-        return itemRepository.findAllByOwner(userRepository.findById(ownerId).orElseThrow()).stream()
-                .map(item -> unitedQueryForBookingItemDto(item, ownerId))
-                .sorted(Comparator.comparing(itemDto -> {
-                    Long itemId = itemDto.getId();
-                    int index = order.indexOf(itemId);
-                    return index != -1 ? index : Integer.MAX_VALUE;
-                }))
+        Map<Long, List<CommentDto>> commentMap = commentRepository.findAllByItemOwnerId(ownerId).stream()
+                .collect(Collectors.groupingBy(
+                        comment -> comment.getItem().getId(),
+                        Collectors.mapping(CommentMapper::toCommentDto, Collectors.toList())));
+
+        Map<Long, BookingItemDto> previouslyBookingMap = bookingRepository
+                .findNearPreviousBookings(LocalDateTime.now(), ownerId).stream()
+                .collect(Collectors.toMap(BookingItemDto::getItemId, bookingItemDto -> bookingItemDto));
+
+        Map<Long, BookingItemDto> nextBookingMap = bookingRepository
+                .findNearNextBookings(LocalDateTime.now(), ownerId).stream()
+                .collect(Collectors.toMap(BookingItemDto::getItemId, bookingItemDto -> bookingItemDto));
+
+        Set<Long> order = bookingRepository.findAllByOwnerId(ownerId).stream()
+                .map(booking -> booking.getItem().getId())
+                .collect(Collectors.toSet());
+
+        Map<Long, Item> itemMap = itemRepository.findAllByOwnerId(ownerId).stream()
+                .collect(Collectors.toMap(Item::getId, item -> item));
+
+        order.addAll(new HashSet<>(itemMap.keySet()));
+
+        return order.stream()
+                .map(id -> ItemMapper.toItemDtoGetMethod(
+                        itemMap.get(id), commentMap.get(id), previouslyBookingMap.getOrDefault(id, null),
+                        nextBookingMap.getOrDefault(id, null)))
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ItemDto> getItemsByName(String text) {
-        log.info(LOG_MESSAGE, "получение предметов по названию: ", text);
+        log.info(SERVICE_LOG, "получение предметов по названию: ", text);
         if (text.isBlank()) {
             return List.of();
         }
-        return itemRepository.findAllByText(text).stream()
-                .map(item -> ItemMapper.toItemDto(item,
-                        commentRepository.findAllByItem(item).stream()
-                                .map(CommentMapper::toCommentDto)
-                                .collect(Collectors.toList())))
+
+        Map<Long, Item> itemMap = itemRepository.findAllByText(text).stream()
+                .collect(Collectors.toMap(Item::getId, item -> item));
+
+        Map<Long, List<Comment>> commentMap = commentRepository.findAllByItemIn(
+                new ArrayList<>(itemMap.values())).stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+
+        return itemMap.values().stream()
+                .map(item -> ItemMapper.toItemDto(item, commentMap.getOrDefault(item.getId(), List.of()).stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList())))
                 .collect(Collectors.toList());
     }
 
     public CommentDto addCommentToItem(Long itemId, CommentDto commentDto, Long authorId) {
-        log.info(LOG_MESSAGE, "добавление комментария: ", commentDto.getText());
+        log.info(SERVICE_LOG, "добавление комментария: ", commentDto.getText());
         commentDto.setCreated(LocalDateTime.now());
         Item item = checkItemExist(itemId);
         User author = checkUserExist(authorId);
@@ -121,38 +157,30 @@ public class ItemServiceImpl implements ItemService {
 
     private User checkUserExist(Long ownerId) {
         log.info("Начата процедура проверки наличия в репозитории пользователя с id: {}", ownerId);
-        Optional<User> userOptional = userRepository.findById(ownerId);
-        if (userOptional.isEmpty()) {
-            throw new UserExistException("Ошибка. Запрошенного пользователя в базе данных не существует");
-        }
-        return userOptional.orElseThrow();
+        return userRepository.findById(ownerId).orElseThrow(
+                () -> new UserExistException("Ошибка. Запрошенного пользователя в базе данных не существует"));
     }
 
     private Item checkItemExist(Long itemId) {
         log.info("Начата процедура проверки наличия в репозитории предмета с id: {}", itemId);
-        Optional<Item> itemOptional = itemRepository.findById(itemId);
-        if (itemOptional.isEmpty()) {
-            throw new ItemExistException("Ошибка. Запрошенного предмета в базе данных не существует");
-        }
-        return itemOptional.orElseThrow();
+        return itemRepository.findById(itemId).orElseThrow(
+                () -> new ItemExistException("Ошибка. Запрошенного предмета в базе данных не существует"));
     }
 
     private void checkUserIsOwner(Long itemId, Long ownerId) {
         log.info("Начата процедура проверки принадлежности предмета с id: {} пользователю с id: {}", itemId, ownerId);
-        if (!itemRepository.findById(itemId).orElseThrow().getOwner().getId().equals(ownerId)) {
+        if (!itemRepository.findById(itemId).orElseThrow(
+                () -> new ItemExistException("Ошибка. Запрошенного предмета в базе данных не существует"))
+                .getOwner().getId().equals(ownerId)) {
             throw new ItemWithWrongOwner("Ошибка. Обновить/удалить предмет может только владелец предмета");
         }
     }
 
-    private ItemDto unitedQueryForBookingItemDto(Item item,Long userId) {
-        return ItemMapper.toItemDtoGetMethod(
-                item,
-                commentRepository.findAllByItem(item).stream()
-                        .map(CommentMapper::toCommentDto)
-                        .collect(Collectors.toList()),
-                bookingRepository.findFirstByStartBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(
-                        LocalDateTime.now(), item.getId(), userId),
-                bookingRepository.findFirstByStartAfterAndItemIdAndItemOwnerIdAndStatusOrderByStartAsc(
-                        LocalDateTime.now(), item.getId(), userId, BookingStatus.APPROVED));
+    private BookingItemDto checkBookingItemDtoList(List<BookingItemDto> bookinglist) {
+        if (bookinglist.size() == 0) {
+            return null;
+        } else {
+            return bookinglist.get(0);
+        }
     }
 }

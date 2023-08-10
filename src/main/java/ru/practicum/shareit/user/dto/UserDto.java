@@ -3,7 +3,7 @@ package ru.practicum.shareit.user.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.dto.CommentDto;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -19,5 +19,5 @@ public class UserDto {
     @Email
     @NotBlank
     private String email;
-    List<Comment> comments;
+    private List<CommentDto> comments;
 }

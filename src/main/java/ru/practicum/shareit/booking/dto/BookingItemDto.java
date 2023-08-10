@@ -7,5 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class BookingItemDto {
     private Long id;
+    private Long itemId;
     private Long bookerId;
 }

@@ -14,6 +14,7 @@ import ru.practicum.shareit.user.model.User;
 @UtilityClass
 public class BookingMapper {
     public Booking toBookingFromReceivedDto(ReceivedBookingDto bookingDto, Item item, User user) {
+        log.info("Начата процедура преобразования ДТО в бронь: {}", bookingDto);
         return new Booking(null,
                 bookingDto.getStart(),
                 bookingDto.getEnd(),
@@ -23,6 +24,7 @@ public class BookingMapper {
     }
 
     public ReturnBookingDto toBookingDto(Booking booking) {
+        log.info("Начата процедура преобразования брони в ДТО: {}", booking);
         return new ReturnBookingDto(
                 booking.getId(),
                 booking.getStart(),

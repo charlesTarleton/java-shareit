@@ -11,18 +11,11 @@ import ru.practicum.shareit.exceptions.*;
 
 import javax.validation.ValidationException;
 
+import static ru.practicum.shareit.utils.ConstantaStorage.Error.*;
+
 @RestControllerAdvice
 @Slf4j
 public class ControllerAdvice {
-    private static final String ERROR_400 = "Ошибка 400";
-    private static final String ERROR_400_DESCRIPTION = "Ошибка валидации";
-
-    private static final String ERROR_404 = "Ошибка 404";
-    private static final String ERROR_404_DESCRIPTION = "Искомый объект не найден";
-
-    private static final String ERROR_500 = "Unknown state: UNSUPPORTED_STATUS";
-    private static final String ERROR_500_DESCRIPTION = "Возникло исключение";
-
     @ExceptionHandler({ItemNotAvailableException.class, MethodArgumentNotValidException.class,
             ValidationException.class, BookingChangeStatusException.class, CommentBookerException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -36,7 +29,7 @@ public class ControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse fourHundredFourErrorHandle(Exception exception) {
         log.warn(ERROR_404, exception);
-        return new ErrorResponse(ERROR_404, ERROR_404_DESCRIPTION);
+        return new ErrorResponse(ERROR_404, ConstantaStorage.Error.ERROR_404_DESCRIPTION);
     }
 
     @ExceptionHandler

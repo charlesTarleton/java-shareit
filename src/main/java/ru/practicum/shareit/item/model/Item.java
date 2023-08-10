@@ -1,14 +1,13 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @Table(name = "items")
 @NoArgsConstructor
@@ -30,7 +29,4 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
-    //@ManyToMany(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "request_id")
-    //private String request; // все еще заглушка до задействования реквестов
 }

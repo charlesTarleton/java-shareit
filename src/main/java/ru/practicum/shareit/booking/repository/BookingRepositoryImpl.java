@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ru.practicum.shareit.booking.bookingUtils.BookingStatus;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 
@@ -15,92 +15,123 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.booker.id = ?1 " +
+            "WHERE b.booker.id = :bookerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllByBookerId(Long bookerId); // Booker ALL
+    List<Booking> findAllByBookerId(@Param("bookerId") Long bookerId); // Booker ALL
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.start < ?2 AND b.end > ?2 AND b.booker.id = ?1 " +
+            "WHERE b.start < :currentTime AND b.end > :currentTime AND b.booker.id = :bookerId " +
             "ORDER BY b.start ASC")
-    List<Booking> findAllCurrentByBookerId(Long bookerId, LocalDateTime currentTime); // Booker CURRENT
+    List<Booking> findAllCurrentByBookerId(@Param("bookerId") Long bookerId,
+                                           @Param("currentTime") LocalDateTime currentTime); // Booker CURRENT
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.end < ?2 AND b.booker.id = ?1 " +
+            "WHERE b.end < :currentTime AND b.booker.id = :bookerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllPastByBookerId(Long bookerId, LocalDateTime currentTime); // Booker PAST
+    List<Booking> findAllPastByBookerId(@Param("bookerId") Long bookerId,
+                                        @Param("currentTime") LocalDateTime currentTime); // Booker PAST
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.start > ?2 AND b.booker.id = ?1 " +
+            "WHERE b.start > :currentTime AND b.booker.id = :bookerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllFutureByBookerId(Long bookerId, LocalDateTime currentTime); // Booker FUTURE
+    List<Booking> findAllFutureByBookerId(@Param("bookerId") Long bookerId,
+                                          @Param("currentTime") LocalDateTime currentTime); // Booker FUTURE
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.status = 'WAITING' AND b.booker.id = ?1 " +
+            "WHERE b.status = 'WAITING' AND b.booker.id = :bookerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllWaitingByBookerId(Long bookerId); // Booker WAITING
+    List<Booking> findAllWaitingByBookerId(@Param("bookerId") Long bookerId); // Booker WAITING
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.status = 'REJECTED' AND b.booker.id = ?1 " +
+            "WHERE b.status = 'REJECTED' AND b.booker.id = :bookerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllRejectedByBookerId(Long bookerId); // Booker REJECTED
+    List<Booking> findAllRejectedByBookerId(@Param("bookerId") Long bookerId); // Booker REJECTED
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.item " +
-            "WHERE b.item.owner.id = ?1 " +
+            "WHERE b.item.owner.id = :ownerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllByOwnerId(Long ownerId); // Owner ALL
+    List<Booking> findAllByOwnerId(@Param("ownerId") Long ownerId); // Owner ALL
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.item " +
-            "WHERE b.start < ?2 AND b.end > ?2 AND b.item.owner.id = ?1 " +
+            "WHERE b.start < :currentTime AND b.end > :currentTime AND b.item.owner.id = :ownerId " +
             "ORDER BY b.start ASC")
-    List<Booking> findAllCurrentByOwnerId(Long ownerId, LocalDateTime currentTime); // Owner CURRENT
+    List<Booking> findAllCurrentByOwnerId( @Param("ownerId") Long ownerId,
+                                           @Param("currentTime") LocalDateTime currentTime); // Owner CURRENT
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.item " +
-            "WHERE b.end < ?2 AND b.item.owner.id = ?1 " +
+            "WHERE b.end < :currentTime AND b.item.owner.id = :ownerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllPastByOwnerId(Long ownerId, LocalDateTime currentTime); // Owner PAST
+    List<Booking> findAllPastByOwnerId(@Param("ownerId") Long ownerId,
+                                       @Param("currentTime") LocalDateTime currentTime); // Owner PAST
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.item " +
-            "WHERE b.start > ?2 AND b.item.owner.id = ?1 " +
+            "WHERE b.start > :currentTime AND b.item.owner.id = :ownerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllFutureByOwnerId(Long ownerId, LocalDateTime currentTime); // Owner FUTURE
+    List<Booking> findAllFutureByOwnerId(@Param("ownerId") Long ownerId,
+                                         @Param("currentTime") LocalDateTime currentTime); // Owner FUTURE
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.item " +
-            "WHERE b.status = 'WAITING' AND b.item.owner.id = ?1 " +
+            "WHERE b.status = 'WAITING' AND b.item.owner.id = :ownerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllWaitingByOwnerId(Long ownerId); // Owner WAITING
+    List<Booking> findAllWaitingByOwnerId(@Param("ownerId") Long ownerId); // Owner WAITING
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
-            "JOIN FETCH b.item " +
-            "WHERE b.status = 'REJECTED' AND b.item.owner.id = ?1 " +
+            "WHERE b.status = 'REJECTED' AND b.item.owner.id = :ownerId " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllRejectedByOwnerId(Long ownerId); // Owner REJECTED
+    List<Booking> findAllRejectedByOwnerId(@Param("ownerId") Long ownerId); // Owner REJECTED
 
-    BookingItemDto findFirstByStartBeforeAndItemIdAndItemOwnerIdOrderByEndDesc(LocalDateTime currentTime,
-                                                                             Long itemId, Long userId);
+    @Query("SELECT new ru.practicum.shareit.booking.dto.BookingItemDto(b1.id, b1.item.id, b1.booker.id) " +
+            "FROM Booking AS b1 " +
+            "WHERE b1.start = (" +
+            "   SELECT MIN(b2.start) " +
+            "   FROM Booking AS b2 " +
+            "   WHERE b2.item.id = b1.item.id AND b2.start < :currentTime) " +
+            "AND b1.item.owner.id = :ownerId " +
+            "ORDER BY b1.end DESC")
+    List<BookingItemDto> findNearPreviousBookings(@Param("currentTime") LocalDateTime currentTime,
+                                                  @Param("ownerId") Long ownerId);
 
-    BookingItemDto findFirstByStartAfterAndItemIdAndItemOwnerIdAndStatusOrderByStartAsc(LocalDateTime currentTime,
-                                                                                        Long itemId, Long userId,
-                                                                                        BookingStatus status);
+    @Query("SELECT new ru.practicum.shareit.booking.dto.BookingItemDto(b1.id, b1.item.id, b1.booker.id) " +
+            "FROM Booking AS b1 " +
+            "WHERE b1.start = (" +
+            "   SELECT MIN(b2.start) " +
+            "   FROM Booking AS b2 " +
+            "   WHERE b2.item.id = b1.item.id AND b2.start > :currentTime) " +
+            "AND b1.item.owner.id = :ownerId " +
+            "AND b1.status = 'APPROVED' " +
+            "ORDER BY b1.start ASC")
+    List<BookingItemDto> findNearNextBookings(@Param("currentTime") LocalDateTime currentTime,
+                                              @Param("ownerId") Long ownerId);
+
+    @Query("SELECT new ru.practicum.shareit.booking.dto.BookingItemDto(b.id, b.item.id, b.booker.id) " +
+            "FROM Booking AS b " +
+            "WHERE b.start < :currentTime " +
+            "AND b.item.id = :itemId " +
+            "AND b.item.owner.id = :ownerId " +
+            "ORDER BY b.end DESC")
+    List<BookingItemDto> findNearPreviousBooking(@Param("currentTime") LocalDateTime currentTime,
+                                                 @Param("ownerId") Long ownerId,
+                                                 @Param("itemId") Long itemId);
+
+    @Query("SELECT new ru.practicum.shareit.booking.dto.BookingItemDto(b.id, b.item.id, b.booker.id) " +
+            "FROM Booking AS b " +
+            "WHERE b.start > :currentTime " +
+            "AND b.status = 'APPROVED' " +
+            "AND b.item.id = :itemId " +
+            "AND b.item.owner.id = :ownerId " +
+            "ORDER BY b.start ASC")
+    List<BookingItemDto> findNearNextBooking(@Param("currentTime") LocalDateTime currentTime,
+                                             @Param("ownerId") Long ownerId,
+                                             @Param("itemId") Long itemId);
 }
