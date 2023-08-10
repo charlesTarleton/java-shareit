@@ -22,7 +22,7 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "WHERE b.start < :currentTime AND b.end > :currentTime AND b.booker.id = :bookerId " +
-            "ORDER BY b.start ASC")
+            "ORDER BY b.start DESC")
     List<Booking> findAllCurrentByBookerId(@Param("bookerId") Long bookerId,
                                            @Param("currentTime") LocalDateTime currentTime); // Booker CURRENT
 
@@ -61,7 +61,7 @@ public interface BookingRepositoryImpl extends JpaRepository<Booking, Long> {
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "WHERE b.start < :currentTime AND b.end > :currentTime AND b.item.owner.id = :ownerId " +
-            "ORDER BY b.start ASC")
+            "ORDER BY b.start DESC")
     List<Booking> findAllCurrentByOwnerId(@Param("ownerId") Long ownerId,
                                            @Param("currentTime") LocalDateTime currentTime); // Owner CURRENT
 
