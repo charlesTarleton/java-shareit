@@ -17,15 +17,16 @@ import static ru.practicum.shareit.utils.ConstantaStorage.Error.*;
 @Slf4j
 public class ControllerAdvice {
     @ExceptionHandler({ItemNotAvailableException.class, MethodArgumentNotValidException.class,
-            ValidationException.class, BookingChangeStatusException.class, CommentBookerException.class})
+            ValidationException.class, BookingChangeStatusException.class, CommentBookerException.class,
+            PageableException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse fourHundredErrorHandle(final Exception exception) {
         log.warn(ERROR_400, exception);
         return new ErrorResponse(ERROR_400, ERROR_400_DESCRIPTION);
     }
 
-    @ExceptionHandler({ItemWithWrongOwner.class, ItemWithoutOwnerException.class,
-            UserExistException.class, ItemExistException.class, BookingExistException.class})
+    @ExceptionHandler({ItemWithWrongOwner.class, ItemWithoutOwnerException.class, UserExistException.class,
+            ItemExistException.class, BookingExistException.class, RequestExistException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse fourHundredFourErrorHandle(Exception exception) {
         log.warn(ERROR_404, exception);

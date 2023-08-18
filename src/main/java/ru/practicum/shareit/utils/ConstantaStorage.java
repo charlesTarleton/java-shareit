@@ -30,4 +30,9 @@ public final class ConstantaStorage {
         public static final String ERROR_500 = "Unknown state: UNSUPPORTED_STATUS";
         public static final String ERROR_500_DESCRIPTION = "Возникло исключение";
     }
+
+    public static final class Request {
+        public static final String CONTROLLER_LOG = "Контроллер запросов получил запрос на {}{}";
+        public static final String SERVICE_LOG = "Сервис запросов получил запрос на {}{}";
+    }
 }

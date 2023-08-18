@@ -14,9 +14,9 @@ public interface ItemService {
 
     public ItemDto getItem(Long itemId, Long userId);
 
-    public List<ItemDto> getItemsByOwner(Long owner);
+    public List<ItemDto> getItemsByOwner(Long owner, Integer from, Integer size);
 
-    public List<ItemDto> getItemsByName(String name);
+    public List<ItemDto> getItemsByName(String name, Integer from, Integer size);
 
     public CommentDto addCommentToItem(Long itemId, CommentDto commentDto, Long authorId);
 }

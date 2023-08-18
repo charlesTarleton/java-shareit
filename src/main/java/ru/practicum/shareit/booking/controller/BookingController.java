@@ -45,16 +45,22 @@ public class BookingController {
     @GetMapping("/owner")
     public List<ReturnBookingDto> getOwnerBookings(
             @RequestParam(value = "state", required = false) String stateText,
+            @RequestParam(value = "from", required = false) Integer from,
+            @RequestParam(value = "size", required = false) Integer size,
             @RequestHeader(USER_HEADER) Long ownerId) {
         log.info(CONTROLLER_LOG, "получение брони вещей, принадлежащих пользователем с id: ", ownerId);
-        return bookingService.getOwnerBookings(BookingState.getBookingsStateFromString(stateText), ownerId);
+        return bookingService.getOwnerBookings(BookingState.getBookingsStateFromString(stateText),
+                from, size, ownerId);
     }
 
     @GetMapping
     public List<ReturnBookingDto> getBookerBookings(
             @RequestParam(value = "state", required = false) String stateText,
+            @RequestParam(value = "from", required = false) Integer from,
+            @RequestParam(value = "size", required = false) Integer size,
             @RequestHeader(USER_HEADER) Long bookerId) {
         log.info(CONTROLLER_LOG, "получение брони вещей, арендованных пользователю с id: ", bookerId);
-        return bookingService.getBookerBookings(BookingState.getBookingsStateFromString(stateText), bookerId);
+        return bookingService.getBookerBookings(BookingState.getBookingsStateFromString(stateText),
+                from, size, bookerId);
     }
 }

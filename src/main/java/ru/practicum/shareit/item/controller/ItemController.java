@@ -46,15 +46,19 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsByName(@RequestParam("text") String text) {
+    public List<ItemDto> getItemsByName(@RequestParam("text") String text,
+                                        @RequestParam(value = "from", required = false) Integer from,
+                                        @RequestParam(value = "size", required = false) Integer size) {
         log.info(CONTROLLER_LOG, "получение всех предметов, содержащих в названии: ", text);
-        return itemService.getItemsByName(text);
+        return itemService.getItemsByName(text, from, size);
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByOwner(@RequestHeader(USER_HEADER) Long ownerId) {
+    public List<ItemDto> getItemsByOwner(@RequestHeader(USER_HEADER) Long ownerId,
+                                         @RequestParam(value = "from", required = false) Integer from,
+                                         @RequestParam(value = "size", required = false) Integer size) {
         log.info(CONTROLLER_LOG, "получение всех предметов пользователя с id: ", ownerId);
-        return itemService.getItemsByOwner(ownerId);
+        return itemService.getItemsByOwner(ownerId, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

@@ -43,8 +43,9 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getUsers() {
+    public List<UserDto> getUsers(@RequestParam(value = "from", required = false) Integer from,
+                                  @RequestParam(value = "size", required = false) Integer size) {
         log.info(CONTROLLER_LOG, "получение всех пользователей", "");
-        return userService.getUsers();
+        return userService.getUsers(from, size);
     }
 }
