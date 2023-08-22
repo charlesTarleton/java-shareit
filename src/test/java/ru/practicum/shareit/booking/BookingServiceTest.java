@@ -238,6 +238,10 @@ public class BookingServiceTest {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
         assertThrows(BookingChangeStatusException.class,
                 () -> bookingService.setBookingStatus(1L, true, 2L));
+
+        booking.setStatus(BookingStatus.APPROVED);
+        assertThrows(ItemWithWrongOwner.class,
+                () -> bookingService.setBookingStatus(1L, true, 1L));
     }
 
     @Test

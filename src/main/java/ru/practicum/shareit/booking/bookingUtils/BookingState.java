@@ -21,7 +21,7 @@ public enum BookingState {
             } else {
                 return BookingState.valueOf(stateText);
             }
-        } catch (MethodArgumentTypeMismatchException e) {
+        } catch (MethodArgumentTypeMismatchException | IllegalArgumentException e) {
             throw new IllegalBookingStateException("Ошибка. в BookingState было передано недопустимое значение");
         }
     }

@@ -179,10 +179,23 @@ public class ItemServiceTest {
     }
 
     @Test
-    void shouldCheckExistExceptions() {
+    void checkExistExceptions() {
         final ItemDto itemDto1 = new ItemDto();
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(UserExistException.class,
                 () -> itemService.addItem(itemDto1, 2L));
+    }
+
+    @Test
+    void checkValidationException() {
+        Item localItem = new Item(2L, null, null, null, null, null);
+        Booking booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now(),
+                item, owner, BookingStatus.APPROVED);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(localItem));
+        when(bookingRepository.findAllPastByBookerId(anyLong(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        assertThrows(CommentBookerException.class, () -> itemService.addCommentToItem(
+                2L, new CommentDto(null, "Комментарий 1", null, null),2L));
     }
 }

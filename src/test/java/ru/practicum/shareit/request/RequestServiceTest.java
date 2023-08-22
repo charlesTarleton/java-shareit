@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
+import ru.practicum.shareit.exceptions.RequestExistException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepositoryImpl;
 import ru.practicum.shareit.request.dto.ReceivedRequestDto;
@@ -102,5 +103,12 @@ public class RequestServiceTest {
         verify(userRepository, times(1)).findById(anyLong());
         verify(requestRepository, times(1)).findRequestsByRequestorId(anyLong());
         verify(itemRepository, times(1)).findAllByRequestsId(any());
+    }
+
+    @Test
+    void checkExistException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(requestRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(RequestExistException.class, () -> requestService.getRequest(50L, 1L));
     }
 }

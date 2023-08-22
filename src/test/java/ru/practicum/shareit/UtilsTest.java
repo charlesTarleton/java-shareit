@@ -2,6 +2,8 @@ package ru.practicum.shareit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
+import ru.practicum.shareit.booking.bookingUtils.BookingState;
+import ru.practicum.shareit.exceptions.IllegalBookingStateException;
 import ru.practicum.shareit.exceptions.ItemNotAvailableException;
 import ru.practicum.shareit.exceptions.PageableException;
 import ru.practicum.shareit.exceptions.UserExistException;
@@ -40,5 +42,11 @@ public class UtilsTest {
         assertEquals(20, pageable.getPageSize());
         assertEquals(Sort.unsorted(), pageable.getSort());
         assertThrows(PageableException.class, () -> ShareItPageable.checkPageable(-1, -2, Sort.unsorted()));
+    }
+
+    @Test
+    void checkBookingStateException() {
+        assertThrows(IllegalBookingStateException.class,
+                () -> BookingState.getBookingsStateFromString("BookingState.UNSUPPORTED"));
     }
 }
