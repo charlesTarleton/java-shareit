@@ -10,15 +10,14 @@ import ru.practicum.shareit.item.service.ItemService;
 import javax.validation.Valid;
 import java.util.List;
 
-import static ru.practicum.shareit.utils.ConstantaStorage.Item.CONTROLLER_LOG;
-import static ru.practicum.shareit.utils.ConstantaStorage.Common.USER_HEADER;
-
 @RestController
 @Slf4j
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
+    private final String CONTROLLER_LOG = "Контроллер предметов получил запрос на {}{}";
+    private final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(USER_HEADER) Long ownerId) {

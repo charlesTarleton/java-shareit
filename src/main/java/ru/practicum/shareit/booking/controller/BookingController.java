@@ -11,15 +11,14 @@ import ru.practicum.shareit.booking.service.BookingService;
 import javax.validation.Valid;
 import java.util.List;
 
-import static ru.practicum.shareit.utils.ConstantaStorage.Booking.CONTROLLER_LOG;
-import static ru.practicum.shareit.utils.ConstantaStorage.Common.USER_HEADER;
-
 @RestController
 @Slf4j
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
+    private final String CONTROLLER_LOG = "Контроллер бронирования получил запрос на {}{}";
+    private final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ReturnBookingDto addBooking(@Valid @RequestBody ReceivedBookingDto bookingDto,

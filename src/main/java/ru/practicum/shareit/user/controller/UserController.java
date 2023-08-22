@@ -9,14 +9,13 @@ import ru.practicum.shareit.user.dto.UserDto;
 import javax.validation.Valid;
 import java.util.List;
 
-import static ru.practicum.shareit.utils.ConstantaStorage.User.CONTROLLER_LOG;
-
 @RestController
 @Slf4j
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final String CONTROLLER_LOG = "Контроллер пользователей получил запрос на {}{}";
 
     @PostMapping
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {

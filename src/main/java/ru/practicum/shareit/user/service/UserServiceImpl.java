@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.utils.ConstantaStorage.User.SERVICE_LOG;
-
 @Service
 @Slf4j
 @Transactional
@@ -28,6 +26,7 @@ import static ru.practicum.shareit.utils.ConstantaStorage.User.SERVICE_LOG;
 public class UserServiceImpl implements UserService {
     private final UserRepositoryImpl userRepository;
     private final CommentRepositoryImpl commentRepository;
+    private final String SERVICE_LOG = "Сервис пользователей получил запрос на {}{}";
 
     public UserDto addUser(UserDto userDto) {
         log.info(SERVICE_LOG, "добавление пользователя: ", userDto);

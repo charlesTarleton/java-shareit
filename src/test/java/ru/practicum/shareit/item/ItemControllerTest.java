@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.practicum.shareit.utils.ConstantaStorage.Common.USER_HEADER;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemControllerTest {
@@ -36,6 +35,7 @@ public class ItemControllerTest {
     private ItemService itemService;
     @InjectMocks
     private ItemController itemController;
+    private final String USER_HEADER = "X-Sharer-User-Id";
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
     private ItemDto receivedItemDto;

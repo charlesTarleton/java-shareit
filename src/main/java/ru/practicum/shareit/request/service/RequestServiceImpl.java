@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.utils.ConstantaStorage.Request.SERVICE_LOG;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -34,6 +32,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepositoryImpl requestRepository;
     private final UserRepositoryImpl userRepository;
     private final ItemRepositoryImpl itemRepository;
+    private final String SERVICE_LOG = "Сервис запросов получил запрос на {}{}";
 
     public ReturnRequestDto addRequest(ReceivedRequestDto requestDto, Long requestorId) {
         log.info(SERVICE_LOG, "добавление запроса: ", requestDto);

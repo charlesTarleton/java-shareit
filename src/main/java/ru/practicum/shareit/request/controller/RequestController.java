@@ -11,15 +11,14 @@ import javax.validation.Valid;
 
 import java.util.List;
 
-import static ru.practicum.shareit.utils.ConstantaStorage.Request.CONTROLLER_LOG;
-import static ru.practicum.shareit.utils.ConstantaStorage.Common.USER_HEADER;
-
 @RestController
 @Slf4j
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
+    private final String CONTROLLER_LOG = "Контроллер запросов получил запрос на {}{}";
+    private final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ReturnRequestDto addRequest(@Valid @RequestBody ReceivedRequestDto requestDto,

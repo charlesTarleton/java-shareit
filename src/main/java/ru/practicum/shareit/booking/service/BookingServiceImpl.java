@@ -25,8 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.utils.ConstantaStorage.Booking.SERVICE_LOG;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepositoryImpl bookingRepository;
     private final UserRepositoryImpl userRepository;
     private final ItemRepositoryImpl itemRepository;
+    private final String SERVICE_LOG = "Сервис бронирования получил запрос на {}{}";
 
     public ReturnBookingDto addBooking(ReceivedBookingDto bookingDto, Long userId) {
         log.info(SERVICE_LOG, "добавление бронирования: ", bookingDto);
