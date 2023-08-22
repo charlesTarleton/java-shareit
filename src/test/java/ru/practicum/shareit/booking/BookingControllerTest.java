@@ -18,7 +18,6 @@ import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.ReceivedBookingDto;
 import ru.practicum.shareit.booking.dto.ReturnBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.user.dto.UserDtoBooking;
 
@@ -39,7 +38,7 @@ public class BookingControllerTest {
     private BookingService bookingService;
     @InjectMocks
     BookingController bookingController;
-    private final String USER_HEADER = "X-Sharer-User-Id";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);

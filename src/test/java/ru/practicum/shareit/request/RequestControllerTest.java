@@ -34,7 +34,7 @@ public class RequestControllerTest {
     private RequestServiceImpl requestService;
     @InjectMocks
     private RequestController requestController;
-    private final String USER_HEADER = "X-Sharer-User-Id";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
     private ReceivedRequestDto receivedRequestDto;

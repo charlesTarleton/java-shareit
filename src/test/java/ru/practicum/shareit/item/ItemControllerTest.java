@@ -35,7 +35,7 @@ public class ItemControllerTest {
     private ItemService itemService;
     @InjectMocks
     private ItemController itemController;
-    private final String USER_HEADER = "X-Sharer-User-Id";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
     private ItemDto receivedItemDto;
@@ -152,9 +152,8 @@ public class ItemControllerTest {
     void shouldAddCommentToItem() throws Exception {
         CommentDto receivedCommentDto =
                 new CommentDto(null, "Коммент к предмету 1", "Пользователь 1", LocalDateTime.now());
-        CommentDto returnCommentDto = receivedCommentDto;
-        returnCommentDto.setId(1L);
-        when(itemService.addCommentToItem(1L, receivedCommentDto, 2L)).thenReturn(returnCommentDto);
+        receivedCommentDto.setId(1L);
+        when(itemService.addCommentToItem(1L, receivedCommentDto, 2L)).thenReturn(receivedCommentDto);
         mvc.perform(post("/items/1/comment")
                         .content(mapper.writeValueAsString(receivedCommentDto))
                         .header(USER_HEADER, 2L)
