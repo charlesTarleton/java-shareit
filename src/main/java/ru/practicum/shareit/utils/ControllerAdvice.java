@@ -13,14 +13,14 @@ import javax.validation.ValidationException;
 @RestControllerAdvice
 @Slf4j
 public class ControllerAdvice {
-    public final String ERROR_400 = "Ошибка 400";
-    public final String ERROR_400_DESCRIPTION = "Ошибка валидации";
+    public static final String ERROR_400 = "Ошибка 400";
+    public static final String ERROR_400_DESCRIPTION = "Ошибка валидации";
 
-    public final String ERROR_404 = "Ошибка 404";
-    public final String ERROR_404_DESCRIPTION = "Искомый объект не найден";
+    public static final String ERROR_404 = "Ошибка 404";
+    public static final String ERROR_404_DESCRIPTION = "Искомый объект не найден";
 
-    public final String ERROR_500 = "Unknown state: UNSUPPORTED_STATUS";
-    public final String ERROR_500_DESCRIPTION = "Возникло исключение";
+    public static final String ERROR_500 = "Unknown state: UNSUPPORTED_STATUS";
+    public static final String ERROR_500_DESCRIPTION = "Возникло исключение";
 
     @ExceptionHandler({ItemNotAvailableException.class, MethodArgumentNotValidException.class,
             ValidationException.class, BookingChangeStatusException.class, CommentBookerException.class,
