@@ -16,8 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final String CONTROLLER_LOG = "Контроллер предметов получил запрос на {}{}";
-    private final String USER_HEADER = "X-Sharer-User-Id";
+    private static final String CONTROLLER_LOG = "Контроллер предметов получил запрос на {}{}";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(USER_HEADER) Long ownerId) {

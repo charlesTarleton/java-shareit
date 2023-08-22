@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final String CONTROLLER_LOG = "Контроллер пользователей получил запрос на {}{}";
+    private static final String CONTROLLER_LOG = "Контроллер пользователей получил запрос на {}{}";
 
     @PostMapping
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {

@@ -39,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepositoryImpl userRepository;
     private final BookingRepositoryImpl bookingRepository;
     private final RequestRepositoryImpl requestRepository;
-    private final String SERVICE_LOG = "Сервис предметов получил запрос на {}{}";
+    private static final String SERVICE_LOG = "Сервис предметов получил запрос на {}{}";
 
     public ItemDto addItem(ItemDto itemDto, Long ownerId) {
         log.info(SERVICE_LOG, "добавление предмета: ", itemDto);

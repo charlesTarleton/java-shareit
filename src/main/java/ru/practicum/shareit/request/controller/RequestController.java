@@ -17,8 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
-    private final String CONTROLLER_LOG = "Контроллер запросов получил запрос на {}{}";
-    private final String USER_HEADER = "X-Sharer-User-Id";
+    private static final String CONTROLLER_LOG = "Контроллер запросов получил запрос на {}{}";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ReturnRequestDto addRequest(@Valid @RequestBody ReceivedRequestDto requestDto,

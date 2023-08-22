@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepositoryImpl userRepository;
     private final CommentRepositoryImpl commentRepository;
-    private final String SERVICE_LOG = "Сервис пользователей получил запрос на {}{}";
+    private static final String SERVICE_LOG = "Сервис пользователей получил запрос на {}{}";
 
     public UserDto addUser(UserDto userDto) {
         log.info(SERVICE_LOG, "добавление пользователя: ", userDto);

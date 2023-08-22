@@ -17,8 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
-    private final String CONTROLLER_LOG = "Контроллер бронирования получил запрос на {}{}";
-    private final String USER_HEADER = "X-Sharer-User-Id";
+    private static final String CONTROLLER_LOG = "Контроллер бронирования получил запрос на {}{}";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ReturnBookingDto addBooking(@Valid @RequestBody ReceivedBookingDto bookingDto,
