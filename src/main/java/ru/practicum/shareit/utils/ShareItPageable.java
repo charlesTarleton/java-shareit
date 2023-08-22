@@ -19,6 +19,6 @@ public class ShareItPageable extends PageRequest {
         if (size <= 0 || from < 0) {
             throw new PageableException("Ошибка. Значение from не может быть меньше 0, а size меньше 1");
         }
-        return new ShareItPageable(from, size, sort);
+        return new ShareItPageable(from / size, size, sort);
     }
 }
