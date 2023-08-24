@@ -46,9 +46,9 @@ public class RequestServiceImpl implements RequestService {
     public List<ReturnRequestDto> getOthersRequests(Integer from, Integer size, Long userId) {
         log.info(SERVICE_LOG, "получение запросов постранично начиная с: ", from);
         checkUserExist(userId);
-                List<Request> requestList = requestRepository.findAllForUser(
-                        userId,
-                        ShareItPageable.checkPageable(from, size, Sort.by("created").descending())).toList();
+        List<Request> requestList = requestRepository.findAllForUser(
+                userId,
+                ShareItPageable.checkPageable(from, size, Sort.by("created").descending())).toList();
         return getUniqueOperations(requestList);
     }
 

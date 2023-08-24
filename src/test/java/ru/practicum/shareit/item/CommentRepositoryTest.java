@@ -20,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 public class CommentRepositoryTest {
     @Autowired
-    ItemRepositoryImpl itemRepository;
+    private ItemRepositoryImpl itemRepository;
 
     @Autowired
-    UserRepositoryImpl userRepository;
+    private UserRepositoryImpl userRepository;
 
     @Autowired
-    CommentRepositoryImpl commentRepository;
+    private CommentRepositoryImpl commentRepository;
 
     @Test
     void shouldFindAllByAuthorId() {

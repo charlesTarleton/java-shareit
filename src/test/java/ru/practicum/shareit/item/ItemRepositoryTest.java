@@ -22,13 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 public class ItemRepositoryTest {
     @Autowired
-    UserRepositoryImpl userRepository;
+    private UserRepositoryImpl userRepository;
 
     @Autowired
-    ItemRepositoryImpl itemRepository;
+    private ItemRepositoryImpl itemRepository;
 
     @Autowired
-    RequestRepositoryImpl requestRepository;
+    private RequestRepositoryImpl requestRepository;
 
     @Test
     void shouldFindAllByOwnerId() {

@@ -24,13 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 public class BookingRepositoryTest {
     @Autowired
-    UserRepositoryImpl userRepository;
+    private UserRepositoryImpl userRepository;
 
     @Autowired
-    ItemRepositoryImpl itemRepository;
+    private ItemRepositoryImpl itemRepository;
 
     @Autowired
-    BookingRepositoryImpl bookingRepository;
+    private BookingRepositoryImpl bookingRepository;
 
     private static final ShareItPageable PAGEABLE = new ShareItPageable(0, 20, Sort.unsorted());
 

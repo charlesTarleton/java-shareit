@@ -37,7 +37,7 @@ public class BookingControllerTest {
     @Mock
     private BookingService bookingService;
     @InjectMocks
-    BookingController bookingController;
+    private BookingController bookingController;
     private static final String USER_HEADER = "X-Sharer-User-Id";
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())

@@ -2,12 +2,15 @@ package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ReceivedRequestDto;
 import ru.practicum.shareit.request.dto.ReturnRequestDto;
 import ru.practicum.shareit.request.service.RequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import java.util.List;
 
@@ -15,6 +18,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
+@Validated
 public class RequestController {
     private final RequestService requestService;
     private static final String CONTROLLER_LOG = "Контроллер запросов получил запрос на {}{}";
@@ -28,8 +32,10 @@ public class RequestController {
     }
 
     @GetMapping("/all")
-    public List<ReturnRequestDto> getOthersRequests(@RequestParam(value = "from", required = false) Integer from,
-                                                    @RequestParam(value = "size", required = false) Integer size,
+    public List<ReturnRequestDto> getOthersRequests(@PositiveOrZero @RequestParam(value = "from",
+                                                            required = false) Integer from,
+                                                    @Positive @RequestParam(value = "size",
+                                                            required = false) Integer size,
                                                     @RequestHeader(USER_HEADER) Long userId) {
         log.info(CONTROLLER_LOG, "получение запросов постранично начиная с: ", from);
         return requestService.getOthersRequests(from, size, userId);
