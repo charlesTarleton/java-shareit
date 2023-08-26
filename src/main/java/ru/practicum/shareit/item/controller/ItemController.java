@@ -2,23 +2,26 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-
-import static ru.practicum.shareit.utils.ConstantaStorage.Item.CONTROLLER_LOG;
-import static ru.practicum.shareit.utils.ConstantaStorage.Common.USER_HEADER;
 
 @RestController
 @Slf4j
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
     private final ItemService itemService;
+    private static final String CONTROLLER_LOG = "Контроллер предметов получил запрос на {}{}";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(USER_HEADER) Long ownerId) {
@@ -46,15 +49,19 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsByName(@RequestParam("text") String text) {
+    public List<ItemDto> getItemsByName(@RequestParam("text") String text,
+                                        @PositiveOrZero @RequestParam(value = "from", required = false) Integer from,
+                                        @Positive @RequestParam(value = "size", required = false) Integer size) {
         log.info(CONTROLLER_LOG, "получение всех предметов, содержащих в названии: ", text);
-        return itemService.getItemsByName(text);
+        return itemService.getItemsByName(text, from, size);
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByOwner(@RequestHeader(USER_HEADER) Long ownerId) {
+    public List<ItemDto> getItemsByOwner(@RequestHeader(USER_HEADER) Long ownerId,
+                                         @PositiveOrZero @RequestParam(value = "from", required = false) Integer from,
+                                         @Positive @RequestParam(value = "size", required = false) Integer size) {
         log.info(CONTROLLER_LOG, "получение всех предметов пользователя с id: ", ownerId);
-        return itemService.getItemsByOwner(ownerId);
+        return itemService.getItemsByOwner(ownerId, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

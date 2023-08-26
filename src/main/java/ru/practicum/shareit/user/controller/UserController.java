@@ -2,21 +2,24 @@ package ru.practicum.shareit.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-
-import static ru.practicum.shareit.utils.ConstantaStorage.User.CONTROLLER_LOG;
 
 @RestController
 @Slf4j
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
     private final UserService userService;
+    private static final String CONTROLLER_LOG = "Контроллер пользователей получил запрос на {}{}";
 
     @PostMapping
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {
@@ -43,8 +46,9 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getUsers() {
+    public List<UserDto> getUsers(@PositiveOrZero @RequestParam(value = "from", required = false) Integer from,
+                                  @Positive @RequestParam(value = "size", required = false) Integer size) {
         log.info(CONTROLLER_LOG, "получение всех пользователей", "");
-        return userService.getUsers();
+        return userService.getUsers(from, size);
     }
 }

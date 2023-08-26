@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.UserExistException;
@@ -12,12 +13,11 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 import ru.practicum.shareit.user.userUtils.UserMapper;
+import ru.practicum.shareit.utils.ShareItPageable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static ru.practicum.shareit.utils.ConstantaStorage.User.SERVICE_LOG;
 
 @Service
 @Slf4j
@@ -26,6 +26,7 @@ import static ru.practicum.shareit.utils.ConstantaStorage.User.SERVICE_LOG;
 public class UserServiceImpl implements UserService {
     private final UserRepositoryImpl userRepository;
     private final CommentRepositoryImpl commentRepository;
+    private static final String SERVICE_LOG = "Сервис пользователей получил запрос на {}{}";
 
     public UserDto addUser(UserDto userDto) {
         log.info(SERVICE_LOG, "добавление пользователя: ", userDto);
@@ -64,11 +65,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserDto> getUsers() {
+    public List<UserDto> getUsers(Integer from, Integer size) {
         log.info(SERVICE_LOG, "получение всех пользователей", "");
         Map<Long, List<Comment>> commentMap = commentRepository.findAll().stream()
                 .collect(Collectors.groupingBy(comment -> comment.getAuthor().getId()));
-        return userRepository.findAll().stream()
+        return userRepository.findAll(ShareItPageable.checkPageable(from, size, Sort.unsorted())).stream()
                 .map(user -> UserMapper.toUserDto(user, commentMap.getOrDefault(user.getId(), List.of()).stream()
                         .map(CommentMapper::toCommentDto)
                         .collect(Collectors.toList())))
@@ -79,6 +80,5 @@ public class UserServiceImpl implements UserService {
         log.info("Начата процедура проверки наличия в репозитории пользователя с id: {}", ownerId);
         return userRepository.findById(ownerId).orElseThrow(
                 () -> new UserExistException("Ошибка. Запрошенного пользователя в базе данных не существует"));
-
     }
 }
