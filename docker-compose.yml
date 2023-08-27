@@ -20,15 +20,16 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=spring.datasource.url=jdbc:h2:mem:shareit
-      - SPRING_DATASOURCE_USERNAME=test
-      - SPRING_DATASOURCE_PASSWORD=test
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/shareit
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
 
   db:
-    image: h2database/h2
+    image: postgres:13.7-alpine
     container_name: shareit-db
     ports:
-      - "9092:9092"
+      - "6541:5432"
     environment:
-      - H2_OPTIONS=-ifNotExists -tcpAllowOthers -tcpPort 9092
-      - H2_TCP_PORT=9092
+      - POSTGRES_DB=shareit
+      - POSTGRES_USER=test;
+      - POSTGRES_PASSWORD=test;
