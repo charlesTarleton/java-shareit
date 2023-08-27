@@ -94,7 +94,8 @@ public class BookingServiceImpl implements BookingService {
         Pageable pageable = ShareItPageable.checkPageable(from, size, START_SORT);
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findAllCurrentByBookerId(bookerId, LocalDateTime.now(), pageable);
+                bookings = bookingRepository.findAllCurrentByBookerId(bookerId, LocalDateTime.now(),
+                        ShareItPageable.checkPageable(from, size, Sort.by("start").ascending()));
                 break;
             case PAST:
                 bookings = bookingRepository.findAllPastByBookerId(bookerId, LocalDateTime.now(), pageable);
@@ -121,7 +122,8 @@ public class BookingServiceImpl implements BookingService {
         Pageable pageable = ShareItPageable.checkPageable(from, size, START_SORT);
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findAllCurrentByOwnerId(ownerId, LocalDateTime.now(), pageable);
+                bookings = bookingRepository.findAllCurrentByOwnerId(ownerId, LocalDateTime.now(),
+                        ShareItPageable.checkPageable(from, size, Sort.by("start").ascending()));
                 break;
             case PAST:
                 bookings = bookingRepository.findAllPastByOwnerId(ownerId, LocalDateTime.now(), pageable);
