@@ -56,7 +56,7 @@ public class ItemClient extends BaseClient {
         if (text.isBlank()) {
             return ResponseEntity.ok().body(List.of());
         }
-        return get("/search?from="+ from + "&size=" + size + "&text=" + text, null, Map.of(
+        return get("/search?from=" + from + "&size=" + size + "&text=" + text, null, Map.of(
                 "from", from,
                 "size", size,
                 "text", text));
