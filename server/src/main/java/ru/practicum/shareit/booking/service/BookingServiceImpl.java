@@ -34,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepositoryImpl userRepository;
     private final ItemRepositoryImpl itemRepository;
     private static final String SERVICE_LOG = "Сервис бронирования получил запрос на {}{}";
+    private static final Sort START_SORT = Sort.by("start").descending();
 
     public ReturnBookingDto addBooking(ReceivedBookingDto bookingDto, Long userId) {
         log.info(SERVICE_LOG, "добавление бронирования: ", bookingDto);
@@ -58,7 +59,11 @@ public class BookingServiceImpl implements BookingService {
     public ReturnBookingDto setBookingStatus(Long bookingId, Boolean status, Long ownerId) {
         log.info(SERVICE_LOG, "изменение статуса бронирования на: ", status);
         Booking booking = checkBookingExist(bookingId);
+        if (ownerId.equals(booking.getBooker().getId())) { // добавил только из-за тестов
+            throw new BookerOwnerException("Ошибка. Букер не может поменять статус брони");
+        }
         checkUserIsOwner(ownerId, booking.getItem().getOwner().getId());
+        checkUserExist(ownerId);
         if (!booking.getStatus().equals(BookingStatus.WAITING)) {
             throw new BookingChangeStatusException("Ошибка. Повторное принятие решения по брони не допускается");
         }
@@ -86,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
         log.info(SERVICE_LOG, "получение бронирований пользователя с id: ", bookerId);
         checkUserExist(bookerId);
         Page<Booking> bookings;
-        Pageable pageable = ShareItPageable.checkPageable(from, size, Sort.unsorted());
+        Pageable pageable = ShareItPageable.checkPageable(from, size, START_SORT);
         switch (state) {
             case CURRENT:
                 bookings = bookingRepository.findAllCurrentByBookerId(bookerId, LocalDateTime.now(), pageable);
@@ -113,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
         log.info(SERVICE_LOG, "получение бронирований вещей пользователя с id: ", ownerId);
         checkUserExist(ownerId);
         Page<Booking> bookings;
-        Pageable pageable = ShareItPageable.checkPageable(from, size, Sort.unsorted());
+        Pageable pageable = ShareItPageable.checkPageable(from, size, START_SORT);
         switch (state) {
             case CURRENT:
                 bookings = bookingRepository.findAllCurrentByOwnerId(ownerId, LocalDateTime.now(), pageable);

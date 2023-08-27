@@ -38,7 +38,7 @@ public class ItemClient extends BaseClient {
 
     public ResponseEntity<Object> updateItem(Long itemId, GatewayItemDto itemDto, Long ownerId) {
         log.info(CLIENT_LOG, "обновление предмета с id: ", itemId);
-        return patch("/" + itemDto, ownerId, itemDto);
+        return patch("/" + itemId, ownerId, itemDto);
     }
 
     public void deleteItem(Long itemId, Long ownerId) {

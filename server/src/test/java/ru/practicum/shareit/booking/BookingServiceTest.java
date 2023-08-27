@@ -38,6 +38,7 @@ public class BookingServiceTest {
     private UserRepositoryImpl userRepository;
     @InjectMocks
     private BookingServiceImpl bookingService;
+    private User owner;
     private User user;
     private Item item;
     private Booking booking;
@@ -47,7 +48,7 @@ public class BookingServiceTest {
     @BeforeEach
     void setUp() {
         user = new User(1L, "Пользователь 1", "email1@mail.ru");
-        User owner = new User(2L, "Пользователь 2", "email2@mail.ru");
+        owner = new User(2L, "Пользователь 2", "email2@mail.ru");
         item = new Item(1L, "Предмет 1", "Описание предмета 1", true, owner, null);
         start = LocalDateTime.now().plusDays(1);
         end = start.plusDays(1);
@@ -74,6 +75,7 @@ public class BookingServiceTest {
     void shouldSetBookingStatus() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any())).thenReturn(booking);
+        when(userRepository.findById(any())).thenReturn(Optional.of(owner));
         ReturnBookingDto returnBookingDto = bookingService.setBookingStatus(1L, true, 2L);
         assertNotNull(returnBookingDto);
         assertEquals(1L, returnBookingDto.getId());
@@ -236,11 +238,15 @@ public class BookingServiceTest {
 
         booking.setStatus(BookingStatus.REJECTED);
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
         assertThrows(BookingChangeStatusException.class,
                 () -> bookingService.setBookingStatus(1L, true, 2L));
 
-        booking.setStatus(BookingStatus.APPROVED);
+        booking.setStatus(BookingStatus.WAITING);
         assertThrows(ItemWithWrongOwner.class,
+                () -> bookingService.setBookingStatus(1L, true, 3L));
+
+        assertThrows(BookerOwnerException.class,
                 () -> bookingService.setBookingStatus(1L, true, 1L));
     }
 

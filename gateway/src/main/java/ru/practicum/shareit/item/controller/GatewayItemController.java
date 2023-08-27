@@ -53,8 +53,8 @@ public class GatewayItemController {
     @GetMapping("/search")
     public ResponseEntity<Object> getItemsByName(
             @RequestParam("text") String text,
-            @PositiveOrZero @RequestParam(value = "from", required = false) Integer from,
-            @Positive @RequestParam(value = "size", required = false) Integer size) {
+            @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(value = "size", defaultValue = "20") Integer size) {
         log.info(CONTROLLER_LOG, "получение всех предметов, содержащих в названии: ", text);
         return itemClient.getItemsByName(text, from, size);
     }
@@ -62,8 +62,8 @@ public class GatewayItemController {
     @GetMapping
     public ResponseEntity<Object> getItemsByOwner(
             @RequestHeader(USER_HEADER) Long ownerId,
-            @PositiveOrZero @RequestParam(value = "from", required = false) Integer from,
-            @Positive @RequestParam(value = "size", required = false) Integer size) {
+            @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(value = "size", defaultValue = "20") Integer size) {
         log.info(CONTROLLER_LOG, "получение всех предметов пользователя с id: ", ownerId);
         return itemClient.getItemsByOwner(ownerId, from, size);
     }

@@ -48,8 +48,8 @@ public class GatewayUserController {
 
     @GetMapping
     public ResponseEntity<Object> getUsers(
-            @PositiveOrZero @RequestParam(value = "from", required = false) Integer from,
-            @Positive @RequestParam(value = "size", required = false) Integer size) {
+            @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(value = "size", defaultValue = "20") Integer size) {
         log.info(CONTROLLER_LOG, "получение всех пользователей", "");
         return userClient.getUsers(from, size);
     }

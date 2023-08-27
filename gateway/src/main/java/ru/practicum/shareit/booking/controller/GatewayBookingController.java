@@ -34,7 +34,8 @@ public class GatewayBookingController {
 
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> setBookingStatus(@PathVariable Long bookingId,
-                                                   @RequestParam("approved") Boolean status,
+                                                   @RequestParam(value = "approved",
+                                                           defaultValue = "false") Boolean status,
                                                    @RequestHeader(USER_HEADER) Long ownerId) {
         log.info(CONTROLLER_LOG, "изменение статуса одобрения владельцем брони с id: ", bookingId);
         return bookingClient.setBookingStatus(bookingId, status, ownerId);
@@ -49,7 +50,7 @@ public class GatewayBookingController {
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getOwnerBookings(
-            @RequestParam(value = "state", defaultValue = "all") String stateText,
+            @RequestParam(value = "state", defaultValue = "ALL") String stateText,
             @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
             @Positive @RequestParam(value = "size", defaultValue = "20") Integer size,
             @RequestHeader(USER_HEADER) Long ownerId) {
@@ -59,7 +60,7 @@ public class GatewayBookingController {
 
     @GetMapping
     public ResponseEntity<Object> getBookerBookings(
-            @RequestParam(value = "state", defaultValue = "all") String stateText,
+            @RequestParam(value = "state", defaultValue = "ALL") String stateText,
             @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
             @Positive @RequestParam(value = "size", defaultValue = "20") Integer size,
             @RequestHeader(USER_HEADER) Long bookerId) {

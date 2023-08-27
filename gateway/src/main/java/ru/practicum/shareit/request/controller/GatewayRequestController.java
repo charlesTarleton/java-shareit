@@ -31,8 +31,8 @@ public class GatewayRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getOthersRequests(
-            @PositiveOrZero @RequestParam(value = "from", required = false) Integer from,
-            @Positive @RequestParam(value = "size", required = false) Integer size,
+            @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(value = "size", defaultValue = "20") Integer size,
             @RequestHeader(USER_HEADER) Long userId) {
         log.info(CONTROLLER_LOG, "получение запросов постранично начиная с: ", from);
         return requestClient.getOthersRequests(from, size, userId);

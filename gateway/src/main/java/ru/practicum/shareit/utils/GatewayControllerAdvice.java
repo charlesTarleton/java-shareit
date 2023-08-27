@@ -3,9 +3,12 @@ package ru.practicum.shareit.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.shareit.exceptions.GatewayIllegalBookingStateException;
 
 import javax.validation.ValidationException;
 
@@ -13,7 +16,7 @@ import javax.validation.ValidationException;
 @Slf4j
 @Validated
 public class GatewayControllerAdvice {
-    public static final String ERROR_400 = "Ошибка 400";
+    public static final String ERROR_400 = "Unknown state: UNSUPPORTED_STATUS";
     public static final String ERROR_400_DESCRIPTION = "Ошибка валидации";
 
     public static final String ERROR_404 = "Ошибка 404";
@@ -22,7 +25,8 @@ public class GatewayControllerAdvice {
     public static final String ERROR_500 = "Unknown state: UNSUPPORTED_STATUS";
     public static final String ERROR_500_DESCRIPTION = "Возникло исключение";
 
-    @ExceptionHandler({ValidationException.class})
+    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class,
+            GatewayIllegalBookingStateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public GatewayErrorResponse fourHundredErrorHandle(final Exception exception) {
         log.warn(ERROR_400, exception);
@@ -36,7 +40,7 @@ public class GatewayControllerAdvice {
         return new GatewayErrorResponse(ERROR_404, ERROR_404_DESCRIPTION);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public GatewayErrorResponse fiveHundredErrorHandle(final Throwable exception) {
         log.warn(ERROR_500, exception);

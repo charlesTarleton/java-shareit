@@ -22,15 +22,15 @@ public class ControllerAdvice {
     public static final String ERROR_500 = "Unknown state: UNSUPPORTED_STATUS";
     public static final String ERROR_500_DESCRIPTION = "Возникло исключение";
 
-    @ExceptionHandler({ItemNotAvailableException.class, MethodArgumentNotValidException.class,
-            BookingChangeStatusException.class, CommentBookerException.class})
+    @ExceptionHandler({ItemNotAvailableException.class, MethodArgumentNotValidException.class, ItemWithWrongOwner.class,
+            BookingChangeStatusException.class, CommentBookerException.class, BookingDateValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse fourHundredErrorHandle(final Exception exception) {
         log.warn(ERROR_400, exception);
         return new ErrorResponse(ERROR_400, ERROR_400_DESCRIPTION);
     }
 
-    @ExceptionHandler({ItemWithWrongOwner.class, ItemWithoutOwnerException.class, UserExistException.class,
+    @ExceptionHandler({ItemWithoutOwnerException.class, UserExistException.class, BookerOwnerException.class,
             ItemExistException.class, BookingExistException.class, RequestExistException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse fourHundredFourErrorHandle(Exception exception) {
