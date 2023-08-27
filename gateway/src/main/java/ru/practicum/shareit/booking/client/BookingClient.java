@@ -57,7 +57,7 @@ public class BookingClient extends BaseClient {
 
     public ResponseEntity<Object> getOwnerBookings(GatewayBookingState state, Integer from,
                                                    Integer size, Long ownerId) {
-        return get("/owner??from=" + from + "&size=" + size + "&state=" + state, ownerId, Map.of(
+        return get("/owner?from=" + from + "&size=" + size + "&state=" + state, ownerId, Map.of(
                 "from", from,
                 "size", size,
                 "state", state
