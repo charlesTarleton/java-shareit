@@ -40,7 +40,7 @@ public class GatewayControllerAdvice {
         return new GatewayErrorResponse(ERROR_404, ERROR_404_DESCRIPTION);
     }
 
-    @ExceptionHandler({MissingRequestHeaderException.class})
+    @ExceptionHandler({Throwable.class, MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public GatewayErrorResponse fiveHundredErrorHandle(final Throwable exception) {
         log.warn(ERROR_500, exception);

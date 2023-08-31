@@ -94,8 +94,7 @@ public class BookingServiceImpl implements BookingService {
         Pageable pageable = ShareItPageable.checkPageable(from, size, START_SORT);
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findAllCurrentByBookerId(bookerId, LocalDateTime.now(),
-                        ShareItPageable.checkPageable(from, size, Sort.by("start").ascending()));
+                bookings = bookingRepository.findAllCurrentByBookerId(bookerId, LocalDateTime.now(), pageable);
                 break;
             case PAST:
                 bookings = bookingRepository.findAllPastByBookerId(bookerId, LocalDateTime.now(), pageable);
@@ -122,8 +121,7 @@ public class BookingServiceImpl implements BookingService {
         Pageable pageable = ShareItPageable.checkPageable(from, size, START_SORT);
             switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findAllCurrentByOwnerId(ownerId, LocalDateTime.now(),
-                        ShareItPageable.checkPageable(from, size, Sort.by("start").ascending()));
+                bookings = bookingRepository.findAllCurrentByOwnerId(ownerId, LocalDateTime.now(), pageable);
                 break;
             case PAST:
                 bookings = bookingRepository.findAllPastByOwnerId(ownerId, LocalDateTime.now(), pageable);
@@ -138,9 +136,6 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllRejectedByOwnerId(ownerId, pageable);
                 break;
             default: bookings = bookingRepository.findAllByOwnerId(ownerId, pageable);
-        }
-        if (state.equals(BookingState.ALL) && from == 1 && size == 1 && ownerId == 1L) {
-            return List.of(BookingMapper.toBookingDto(bookingRepository.findById(3L).get()));
         }
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }

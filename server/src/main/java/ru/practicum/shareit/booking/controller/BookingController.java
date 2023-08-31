@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.bookingUtils.BookingState;
 import ru.practicum.shareit.booking.dto.ReceivedBookingDto;
@@ -15,7 +14,6 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
-@Validated
 public class BookingController {
     private final BookingService bookingService;
     private static final String CONTROLLER_LOG = "Контроллер бронирования получил запрос на {}{}";

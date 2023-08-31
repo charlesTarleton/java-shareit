@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.controller;
 
+import org.springframework.stereotype.Controller;
 import ru.practicum.shareit.item.client.ItemClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
-@RestController
+@Controller
 @Slf4j
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class GatewayItemController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseBody
     public void deleteItem(@PathVariable("id") Long itemId, @RequestHeader(USER_HEADER) Long ownerId) {
         log.info(CONTROLLER_LOG, "удаление предмета с id: ", itemId);
         itemClient.deleteItem(itemId, ownerId);

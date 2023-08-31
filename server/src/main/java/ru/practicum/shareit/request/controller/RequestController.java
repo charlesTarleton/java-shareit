@@ -2,7 +2,6 @@ package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ReceivedRequestDto;
 import ru.practicum.shareit.request.dto.ReturnRequestDto;
@@ -14,7 +13,6 @@ import java.util.List;
 @Slf4j
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
-@Validated
 public class RequestController {
     private final RequestService requestService;
     private static final String CONTROLLER_LOG = "Контроллер запросов получил запрос на {}{}";
