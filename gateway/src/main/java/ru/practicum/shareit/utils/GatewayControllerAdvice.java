@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,9 +18,6 @@ public class GatewayControllerAdvice {
     public static final String ERROR_400 = "Unknown state: UNSUPPORTED_STATUS";
     public static final String ERROR_400_DESCRIPTION = "Ошибка валидации";
 
-    public static final String ERROR_404 = "Ошибка 404";
-    public static final String ERROR_404_DESCRIPTION = "Искомый объект не найден";
-
     public static final String ERROR_500 = "Unknown state: UNSUPPORTED_STATUS";
     public static final String ERROR_500_DESCRIPTION = "Возникло исключение";
 
@@ -34,13 +30,6 @@ public class GatewayControllerAdvice {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public GatewayErrorResponse fourHundredFourErrorHandle(Exception exception) {
-        log.warn(ERROR_404, exception);
-        return new GatewayErrorResponse(ERROR_404, ERROR_404_DESCRIPTION);
-    }
-
-    @ExceptionHandler({Throwable.class, MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public GatewayErrorResponse fiveHundredErrorHandle(final Throwable exception) {
         log.warn(ERROR_500, exception);
